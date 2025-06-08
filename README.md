@@ -48,3 +48,42 @@ This project contains a Flask frontend and a FastAPI backend, both containerized
 
 - The backend automatically creates and updates the database schema on startup (for development). For production, use Alembic for migrations.
 - All API endpoints are documented and testable via the FastAPI docs at `/docs` (e.g., http://localhost:8050/docs).
+
+## Docker Deployment
+
+This project is fully containerized. To build and run both the frontend and backend, use:
+
+```powershell
+docker-compose up --build
+```
+
+- The Flask frontend will be available at: http://localhost:5000
+- The FastAPI backend API will be available at: http://localhost:8050
+
+You can stop the stack with:
+
+```powershell
+docker-compose down
+```
+
+### Development Notes
+- Code changes in `frontend/app` and `backend/app` are automatically reflected in the running containers (volumes are mounted).
+- The backend uses a SQLite database by default (`backend/app/test.db`).
+
+## Default User (Lab Configuration)
+
+On first startup, the backend will automatically create a default admin user:
+
+- **Username:** `admin`
+- **Password:** `admin`
+- **Email:** `admin@example.com`
+
+> ⚠️ **Change the default password in production!**
+
+You can log in with these credentials at the frontend login page. This user has full administrative privileges.
+
+## API Documentation
+
+The backend provides interactive API docs at:
+- http://localhost:8050/docs (Swagger UI)
+- http://localhost:8050/redoc (ReDoc)

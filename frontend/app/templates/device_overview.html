@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Dispositivos{% endblock %}
+
+{% block page_title %}Dispositivos{% endblock %}
+
+{% block content %}
+<div class="card rounded-3 shadow-sm mb-4">
+    <div class="card-header">Aprovados</div>
+    <div class="card-body">
+        {% if devices and devices|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Circuito</th>
+                        <th>Organização</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                    <tr>
+                        <td>{{ device.id }}</td>
+                        <td>{{ device.pretty_name }}</td>
+                        <td>{{ device.circuit_id or '-' }}</td>
+                        <td>{{ device.organization_id or '-' }}</td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-primary">Detalhes</a>
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editDeviceModal" data-device-id="{{ device.id }}" data-device-name="{{ device.pretty_name }}" data-circuit-id="{{ device.circuit_id }}" data-organization-id="{{ device.organization_id }}">Editar</button>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteDeviceModal" data-device-id="{{ device.id }}" data-device-name="{{ device.pretty_name }}">Apagar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">Nenhum dispositivo aprovado.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card rounded-3 shadow-sm">
+    <div class="card-header">Aprovação pendente</div>
+    <div class="card-body">
+        {% if pending_devices and pending_devices|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in pending_devices %}
+                    <tr>
+                        <td>{{ device.id }}</td>
+                        <td>{{ device.pretty_name }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveDeviceModal" data-device-id="{{ device.id }}">Aprovar</button>
+                            <form method="POST" action="{{ url_for('deny_device') }}" style="display:inline;">
+                                <input type="hidden" name="device_id" value="{{ device.id }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Negar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">Nenhum dispositivo pendente de aprovação.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Approve Device Modal -->
+<div class="modal fade" id="approveDeviceModal" tabindex="-1" aria-labelledby="approveDeviceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveDeviceModalLabel">Aprovar Dispositivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="approveDeviceForm" method="POST" action="{{ url_for('approve_device') }}">
+                    <input type="hidden" name="device_id" id="approveDeviceId">
+                    <div class="mb-3">
+                        <label for="circuitId" class="form-label">Circuito (opcional)</label>
+                        <select class="form-select" id="circuitId" name="circuit_id">
+                            <option value="">Selecione um circuito</option>
+                            {% for circuit in circuits %}
+                                <option value="{{ circuit.id }}">{{ circuit.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="organizationId" class="form-label">Organização (opcional)</label>
+                        <select class="form-select" id="organizationId" name="organization_id">
+                            <option value="">Selecione uma organização</option>
+                            {% for org in organizations %}
+                                <option value="{{ org.id }}">{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="approveDeviceForm" class="btn btn-primary">Aprovar dispositivo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Device Modal -->
+<div class="modal fade" id="editDeviceModal" tabindex="-1" aria-labelledby="editDeviceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDeviceModalLabel">Editar Dispositivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editDeviceForm" method="POST" action="{{ url_for('edit_device') }}">
+                    <input type="hidden" name="device_id" id="editDeviceId">
+                    <div class="mb-3">
+                        <label for="editPrettyName" class="form-label">Nome do dispositivo</label>
+                        <input type="text" class="form-control" id="editPrettyName" name="pretty_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCircuitId" class="form-label">Circuito</label>
+                        <select class="form-select" id="editCircuitId" name="circuit_id">
+                            <option value="">Selecione um circuito</option>
+                            {% for circuit in circuits %}
+                                <option value="{{ circuit.id }}">{{ circuit.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editOrganizationId" class="form-label">Organização</label>
+                        <select class="form-select" id="editOrganizationId" name="organization_id">
+                            <option value="">Selecione uma organização</option>
+                            {% for org in organizations %}
+                                <option value="{{ org.id }}">{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="editDeviceForm" class="btn btn-warning">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Device Modal -->
+<div class="modal fade" id="deleteDeviceModal" tabindex="-1" aria-labelledby="deleteDeviceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteDeviceModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja apagar o dispositivo <strong id="deleteDeviceName"></strong>?</p>
+                <form id="deleteDeviceForm" method="POST" action="{{ url_for('delete_device') }}">
+                    <input type="hidden" name="device_id" id="deleteDeviceId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="deleteDeviceForm" class="btn btn-danger">Apagar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var approveDeviceModal = document.getElementById('approveDeviceModal');
+    approveDeviceModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var deviceId = button.getAttribute('data-device-id');
+        var input = document.getElementById('approveDeviceId');
+        input.value = deviceId;
+    });
+
+    var editDeviceModal = document.getElementById('editDeviceModal');
+    editDeviceModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var deviceId = button.getAttribute('data-device-id');
+        var deviceName = button.getAttribute('data-device-name');
+        var circuitId = button.getAttribute('data-circuit-id');
+        var organizationId = button.getAttribute('data-organization-id');
+        document.getElementById('editDeviceId').value = deviceId;
+        document.getElementById('editPrettyName').value = deviceName;
+        document.getElementById('editCircuitId').value = circuitId || '';
+        document.getElementById('editOrganizationId').value = organizationId || '';
+    });
+
+    var deleteDeviceModal = document.getElementById('deleteDeviceModal');
+    deleteDeviceModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var deviceId = button.getAttribute('data-device-id');
+        var deviceName = button.getAttribute('data-device-name');
+        document.getElementById('deleteDeviceId').value = deviceId;
+        document.getElementById('deleteDeviceName').textContent = deviceName;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Estatísticas do Sistema{% endblock %}
+
+{% block page_title %}Estatísticas do Sistema{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- System Info Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                Informações do Sistema
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th>Kernel</th>
+                            <td>{{ system_info.kernel }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tempo de Atividade</th>
+                            <td>{{ system_info.uptime }}</td>
+                        </tr>
+                        <tr>
+                            <th>Número de Núcleos</th>
+                            <td>{{ system_info.num_cores }}</td>
+                        </tr>
+                        <tr>
+                            <th>Arquitetura da CPU</th>
+                            <td>{{ system_info.cpu_architecture }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo de CPU</th>
+                            <td>{{ system_info.cpu_type }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Tables Load Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                Carga das Tabelas do Banco de Dados
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nome da Tabela</th>
+                            <th>Contagem de Registros</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for table in database_tables %}
+                        <tr>
+                            <td>{{ table.name }}</td>
+                            <td>{{ table.record_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mass Operations Statistics Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                Estatísticas de Operações em Massa
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th>Campanhas Passivas</th>
+                            <td>{{ mass_operations.passive_campaigns }}</td>
+                        </tr>
+                        <tr>
+                            <th>Campanhas Ativas</th>
+                            <td>{{ mass_operations.active_campaigns }}</td>
+                        </tr>
+                        <tr>
+                            <th>Trabalhos de Firmware</th>
+                            <td>{{ mass_operations.firmware_jobs }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processes Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                Processos
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>PID</th>
+                            <th>Nome do Processo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for process in processes %}
+                        <tr>
+                            <td>{{ process.pid }}</td>
+                            <td>{{ process.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

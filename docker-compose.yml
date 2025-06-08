@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./frontend/app:/app/app
+    depends_on:
+      - backend
+    environment:
+      - FLASK_ENV=development
+
+  backend:
+    build: ./backend
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./backend/app:/app/app
+    environment:
+      - PYTHONUNBUFFERED=1

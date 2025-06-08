@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Alarmes{% endblock %}
+
+{% block page_title %}Alarmes{% endblock %}
+
+{% block extra_css %}
+.form-check-input:checked {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-primary {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-primary:hover {
+    background-color: #7d3c98;
+    border-color: #7d3c98;
+}
+.btn-outline-secondary {
+    color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+{% endblock %}
+
+{% block content %}
+<div class="card content-card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAlarmModal">
+                <i class="bi bi-plus-circle me-2"></i>Criar novo alarme
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alarm in alarms %}
+                    <tr>
+                        <td>{{ alarm.name }}</td>
+                        <td>{{ alarm.description }}</td>
+                        <td>{{ alarm.type }}</td>
+                        <td>
+                            <span class="badge {% if alarm.active %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ 'Ativo' if alarm.active else 'Inativo' }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary">Editar</button>
+                            <button class="btn btn-sm btn-danger">Excluir</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="newAlarmModal" tabindex="-1" aria-labelledby="newAlarmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newAlarmModalLabel">Criar Novo Alarme</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newAlarmForm" method="POST" action="{{ url_for('views.create_alarm') }}">
+                    <div class="mb-3">
+                        <label for="alarmName" class="form-label">Nome do alarme</label>
+                        <input type="text" class="form-control" id="alarmName" name="alarm_name" placeholder="Insira um nome para o alarme">
+                    </div>
+                    <div class="mb-3">
+                        <label for="alarmDescription" class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="alarmDescription" name="alarm_description" placeholder="Insira uma descrição para o alarme">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="activateImmediately" name="activate_immediately">
+                        <label class="form-check-label" for="activateImmediately">Ativar assim que criado</label>
+                    </div>
+                    <div class="mb-3 border p-3 rounded">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendSMS" name="send_sms">
+                            <label class="form-check-label" for="sendSMS">Enviar via SMS</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendEmail" name="send_email" checked>
+                            <label class="form-check-label" for="sendEmail">Enviar via email</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendWhatsApp" name="send_whatsapp">
+                            <label class="form-check-label" for="sendWhatsApp">Enviar via WhatsApp</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alarmType" class="form-label">Tipo de alarme</label>
+                        <select class="form-select" id="alarmType" name="alarm_type">
+                            <option>Dropdown option</option>
+                            <option selected>Consumo elétrico</option>
+                            <option>Pico de tensão</option>
+                            <option>Pico de potência</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="newAlarmForm" class="btn btn-primary">Criar alarme</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var myModal = new bootstrap.Modal(document.getElementById('newAlarmModal'));
+        
+        // You can add any additional JavaScript for form handling here
+    });
+</script>
+{% endblock %}

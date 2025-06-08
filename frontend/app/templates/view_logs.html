@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Logs da aplicação{% endblock %}
+{% block page_title %}Logs da aplicação{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Conteúdo do log</h5>
+    </div>
+    <div class="card-body">
+        <div id="log-container" class="log-container" style="max-height: 600px; overflow-y: auto;">
+            <pre><code id="log-content"></code></pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateLogs() {
+    fetch('/api/logs')
+        .then(response => response.json())
+        .then(data => {
+            const logContent = document.getElementById('log-content');
+            logContent.textContent = data.log_contents.join('');
+            const logContainer = document.getElementById('log-container');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        })
+        .catch(error => console.error('Error fetching logs:', error));
+}
+
+// Update logs immediately and then every second
+updateLogs();
+setInterval(updateLogs, 5000);
+</script>
+{% endblock %}

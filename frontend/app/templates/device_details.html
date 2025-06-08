@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Detalhes do dispositivo{% endblock %}
+{% block page_title %}Detalhes do dispositivo{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        min-height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Identificador: {{ device.id }}</h5>
+                <hr>
+                <p>Instalação: {{ device.installation }}</p>
+                <p>Última mensagem: {{ device.last_message }}</p>
+                <p>Estado: <span class="badge {% if device.status == 'ONLINE' %}bg-success{% else %}bg-danger{% endif %}">{{ device.status }}</span></p>
+                <p>Potência: {{ device.power }}</p>
+                <p>Tensão: {{ device.voltage }}</p>
+                <p>Corrente: {{ device.current }}</p>
+                <p>Consumo total: {{ device.total_consumption }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Visão geral - Consumo</h5>
+                <div id="consumptionChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tensão <small>24h</small></h5>
+                <div id="voltageChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Consumo <small>Semana</small></h5>
+                <div id="energyChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    // Dummy data for charts
+    const consumptionData = [
+        { x: '00:00', y: 30 }, { x: '04:00', y: 25 }, { x: '08:00', y: 45 },
+        { x: '12:00', y: 55 }, { x: '16:00', y: 60 }, { x: '20:00', y: 40 }
+    ];
+
+    const voltageData = [
+        { x: '00:00', y: 220 }, { x: '04:00', y: 218 }, { x: '08:00', y: 225 },
+        { x: '12:00', y: 223 }, { x: '16:00', y: 221 }, { x: '20:00', y: 219 }
+    ];
+
+    const energyData = [
+        { x: 'Mon', y: 100 }, { x: 'Tue', y: 110 }, { x: 'Wed', y: 105 },
+        { x: 'Thu', y: 115 }, { x: 'Fri', y: 108 }, { x: 'Sat', y: 95 }, { x: 'Sun', y: 90 }
+    ];
+
+    // Consumption Chart
+    new ApexCharts(document.querySelector("#consumptionChart"), {
+        series: [{ name: 'Consumption', data: consumptionData }],
+        chart: { type: 'area', height: 300 },
+        xaxis: { type: 'category' },
+        yaxis: { title: { text: 'kWh' } },
+        title: { text: 'Consumo diário', align: 'left' }
+    }).render();
+
+    // Voltage Chart
+    new ApexCharts(document.querySelector("#voltageChart"), {
+        series: [{ name: 'Tensão', data: voltageData }],
+        chart: { type: 'line', height: 300 },
+        xaxis: { type: 'category' },
+        yaxis: { title: { text: 'Volts' } },
+        title: { text: 'Tensão (24h)', align: 'left' }
+    }).render();
+
+    // Energy Chart
+    new ApexCharts(document.querySelector("#energyChart"), {
+        series: [{ name: 'Energy', data: energyData }],
+        chart: { type: 'bar', height: 300 },
+        xaxis: { type: 'category' },
+        yaxis: { title: { text: 'kWh' } },
+        title: { text: 'Consumo energético semanal', align: 'left' }
+    }).render();
+</script>
+{% endblock %}

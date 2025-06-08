@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SGE Frontend</title>
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block title %}Início{% endblock %}
+
+    {% block page_title %}Meus Dispositivos{% endblock %}
+
+    {% block content %}
+    <div class="card rounded-3 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerDeviceModal">
+                    <i class="bi bi-plus-circle me-2"></i>Registrar novo dispositivo
+                </button>
+            </div>
+            {% if devices and devices|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Circuito</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for device in devices %}
+                        <tr>
+                            <td>{{ device.id }}</td>
+                            <td>{{ device.pretty_name }}</td>
+                            <td>{{ device.circuit_id or '-' }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-primary">Detalhes</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">Nenhum dispositivo encontrado para sua conta.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal for device registration -->
+    <div class="modal fade" id="registerDeviceModal" tabindex="-1" aria-labelledby="registerDeviceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerDeviceModalLabel">Registrar Novo Dispositivo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerDeviceForm" method="POST" action="{{ url_for('register_device') }}">
+                        <div class="mb-3">
+                            <label for="prettyName" class="form-label">Nome do dispositivo</label>
+                            <input type="text" class="form-control" id="prettyName" name="pretty_name" placeholder="Insira um nome para o dispositivo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="circuitId" class="form-label">Circuito</label>
+                            <select class="form-select" id="circuitId" name="circuit_id">
+                                <option value="">Selecione um circuito</option>
+                                {% for circuit in circuits %}
+                                    <option value="{{ circuit.id }}">{{ circuit.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="organizationId" class="form-label">Organização</label>
+                            <select class="form-select" id="organizationId" name="organization_id">
+                                <option value="">Selecione uma organização</option>
+                                {% for org in organizations %}
+                                    <option value="{{ org.id }}">{{ org.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="registerDeviceForm" class="btn btn-primary">Registrar dispositivo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

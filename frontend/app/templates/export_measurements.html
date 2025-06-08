@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Exportar medições{% endblock %}
+
+{% block page_title %}Exportar medições{% endblock %}
+
+{% block extra_css %}
+.form-check-input:checked {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-primary {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-primary:hover {
+    background-color: #7d3c98;
+    border-color: #7d3c98;
+}
+.btn-outline-secondary {
+    color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+{% endblock %}
+
+{% block content %}
+<div class="card rounded-3 shadow-sm">
+    <div class="card-body">
+        <form action="{{ url_for('views.export_measurements') }}" method="POST">
+            <div class="mb-3">
+                <label for="file_format" class="form-label">Formato do arquivo</label>
+                <select class="form-select" id="file_format" name="file_format">
+                    <option value="csv">CSV</option>
+                    <option value="xlsx">Excel (XLSX)</option>
+                    <option value="json">JSON</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="timeframe" class="form-label">Período</label>
+                <select class="form-select" id="timeframe" name="timeframe">
+                    <option value="last_24h">Últimas 24 horas</option>
+                    <option value="last_7d">Últimos 7 dias</option>
+                    <option value="last_30d">Últimos 30 dias</option>
+                    <option value="custom">Personalizado</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="start_date" class="form-label">Data de início</label>
+                <input type="date" class="form-control" id="start_date" name="start_date">
+            </div>
+            <div class="mb-3">
+                <label for="end_date" class="form-label">Data de fim</label>
+                <input type="date" class="form-control" id="end_date" name="end_date">
+            </div>
+            <div class="mb-3">
+                <label for="devices" class="form-label">Dispositivos</label>
+                <select class="form-select" id="devices" name="devices" multiple>
+                    <option value="all" selected>Todos os dispositivos</option>
+                    {% for device in devices %}
+                        <option value="{{device.id}}">{{device.id}} - {{device.installation}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="measurements" class="form-label">Medições</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="power" id="power" name="measurements" checked>
+                    <label class="form-check-label" for="power">
+                        Potência
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="voltage" id="voltage" name="measurements" checked>
+                    <label class="form-check-label" for="voltage">
+                        Tensão
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="current" id="current" name="measurements" checked>
+                    <label class="form-check-label" for="current">
+                        Corrente
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="consumption" id="consumption" name="measurements" checked>
+                    <label class="form-check-label" for="consumption">
+                        Consumo
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Exportar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeframeSelect = document.getElementById('timeframe');
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        function toggleCustomDateInputs() {
+            const isCustom = timeframeSelect.value === 'custom';
+            startDateInput.disabled = !isCustom;
+            endDateInput.disabled = !isCustom;
+        }
+
+        timeframeSelect.addEventListener('change', toggleCustomDateInputs);
+        toggleCustomDateInputs();
+    });
+</script>
+{% endblock %}

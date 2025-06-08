@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MGE - {% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{url_for('static', filename='img/favicon.ico')}}">
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
+    <style>
+        #throbber-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .spinner-border {
+            color: #8e44ad !important;
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+
+<body>
+    <!-- Throbber overlay -->
+    <div id="throbber-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    
+    <div class="wrapper">
+        <aside id="sidebar" class="{{ navbar_state }}">
+            <div class="d-flex">
+                <div class="sidebar-heading d-flex justify-content-center align-items-center mx-auto mt-3">
+                    <a href="/"><img src="{{ url_for('static', filename='img/icon.png') }}" alt="EDWZ - MGE Logo" class="img-fluid sidebar-logo-small" style="max-height: 40px;"></a>
+                    <a href="/"><img src="{{ url_for('static', filename='img/mge_navbar.png') }}" alt="EDWZ - MGE Logo" class="img-fluid sidebar-logo" style="max-height: 40px;"></a>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('devices') }}" class="sidebar-link {% if active_page == 'devices' %}active{% endif %}">
+                        <i class="bi bi-cpu"></i>
+                        <span>Dispositivos</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link {% if active_page == 'export' %}active{% endif %}">
+                        <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                        <span>Exportar medições</span>
+                    </a>
+                </li>
+                <li class="sidebar-item"></li>
+                    <a href="#" class="sidebar-link {% if active_page == 'alarms' %}active{% endif %}">
+                        <i class="bi bi-bell-fill"></i>
+                        <span>Alarmes</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed has-dropdown {% if active_page == 'system_statistics' %}active{% endif %}" data-bs-toggle="collapse"
+                        data-bs-target="#monitoring" aria-expanded="false" aria-controls="monitoring">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Monitoramento</span>
+                    </a>
+                    <ul id="monitoring" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Estatísticas básicas</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Estatísitcas avançadas</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Estatísitcas de sistema</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('user_profile') }}" class="sidebar-link {% if active_page == 'user_profile' %}active{% endif %}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Perfil</span>
+                    </a>
+                </li>
+                {% if user.role == 'admin' %}
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
+                            <i class="bi bi-people-fill"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="bi bi-gear-fill"></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="toggle-btn" type="button" id="sidebarToggle">
+                    <i class="bi bi-arrow-left-square-fill"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo da página -->
+        <div class="main">
+
+            <!-- Navbar superior -->
+            <nav class="navbar navbar-expand border-bottom">
+                <div class="container-fluid">
+                    <ul class="navbar-nav ms-auto">
+                        <div style="margin-right: 10px;" class="d-flex align-items-center flex-grow-1 justify-content-center">
+                            <span class="me-3">
+                                <i class="bi bi-clock"></i>
+                                Horário do sistema: <span id="systemTime"></span>
+                            </span>
+                            <span>
+                                <i class="bi bi-geo-alt"></i>
+                                Location: <span id="currentLocation">{{ active_page }}</span>
+                            </span>
+                        </div>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="/static/img/avatar.png" alt="User Avatar" class="rounded-circle me-2" width="32" height="32">
+                                {{user.name}}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="#">Perfil</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="container-fluid p-3">
+
+                <!-- Alertas -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Título da página -->
+                <h1 class="mt-4">
+                    {% block page_title %}{% endblock %}
+                </h1>
+    
+                <!-- Conteúdo -->
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Sidebar toggle -->
+    <script>
+        // Function to toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            
+            // Add transition class before toggling
+            sidebar.classList.add('with-transition');
+            
+            sidebar.classList.toggle("expand");
+            
+            const isExpanded = sidebar.classList.contains('expand');
+            
+            if (isExpanded) {
+                sidebarToggle.innerHTML = '<i class="bi bi-arrow-left-square-fill"></i>';
+            } else {
+                sidebarToggle.innerHTML = '<i class="bi bi-arrow-right-square-fill"></i>';
+            }
+            
+            // Update localStorage
+            localStorage.setItem('sidebarExpanded', isExpanded.toString());
+            
+            // Send state to backend
+            updateBackendState(isExpanded);
+        }
+
+        // Function to update backend state
+        function updateBackendState(isExpanded) {
+            fetch('/update_navbar_state', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken() // Implement this function to get the CSRF token if your app uses it
+                },
+                body: JSON.stringify({ isExpanded: isExpanded })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Navbar state updated:', data))
+            .catch((error) => console.error('Error:', error));
+        }
+
+        // Function to apply saved state
+        function applySavedState() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            let isExpanded = localStorage.getItem('sidebarExpanded');
+            
+            // If there's no localStorage value, use the backend state
+            if (isExpanded === null) {
+                isExpanded = sidebar.classList.contains('expand').toString();
+            }
+            
+            // Remove transition class before applying saved state
+            sidebar.classList.remove('with-transition');
+            
+            if (isExpanded === 'false') {
+                sidebar.classList.remove("expand");
+                sidebarToggle.innerHTML = '<i class="bi bi-arrow-right-square-fill"></i>';
+            } else {
+                sidebar.classList.add("expand");
+                sidebarToggle.innerHTML = '<i class="bi bi-arrow-left-square-fill"></i>';
+            }
+            
+            // Force a reflow to ensure the removal of the transition class takes effect
+            void sidebar.offsetWidth;
+            
+            // Add transition class back after a short delay
+            setTimeout(() => {
+                sidebar.classList.add('with-transition');
+            }, 50);
+        }
+
+        // Add event listener to toggle button
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButton = document.querySelector(".toggle-btn");
+            toggleButton.addEventListener("click", toggleSidebar);
+            
+            // Apply saved state when page loads
+            applySavedState();
+        });
+    </script>
+
+    <!-- Throbber -->
+    <script>
+        const throbberOverlay = document.getElementById('throbber-overlay');
+        const minDisplayTime = 2000;
+        let throbberTimer = null;
+        let loadComplete = false;
+    
+        function showThrobber() {
+            throbberOverlay.style.display = 'flex';
+            loadComplete = false;
+            clearTimeout(throbberTimer);
+            throbberTimer = setTimeout(() => {
+                if (loadComplete) {
+                    hideThrobber();
+                }
+            }, minDisplayTime);
+        }
+    
+        function hideThrobber() {
+            loadComplete = true;
+            if (throbberTimer) {
+                clearTimeout(throbberTimer);
+            }
+            throbberOverlay.style.display = 'none';
+        }
+    
+        // Show throbber when leaving the page
+        window.addEventListener('beforeunload', showThrobber);
+    
+        // Hide throbber when page has loaded
+        window.addEventListener('load', () => {
+            loadComplete = true;
+            if ((Date.now() - throbberTimer) > minDisplayTime) {
+                hideThrobber();
+            }
+        });
+    </script>
+
+    <!-- System time display -->
+    <script>
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('systemTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Update time immediately and then every second
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

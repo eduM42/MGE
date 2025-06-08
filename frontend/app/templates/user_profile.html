@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Perfil do Usuário{% endblock %}
+
+{% block page_title %}Configurações do Perfil do Usuário{% endblock %}
+
+{% block extra_css %}
+.form-check-input:checked {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-primary {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-primary:hover {
+    background-color: #7d3c98;
+    border-color: #7d3c98;
+}
+.btn-outline-secondary {
+    color: #8e44ad;
+    border-color: #8e44ad;
+}
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" id="alterar-senha">Alterar Senha</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('user_profile') }}">
+                    <input type="hidden" name="action" value="change_password">
+                    <p>Preencha o formulário abaixo e pressione o botão Salvar para criar ou atualizar o registro.</p>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Nome de Usuário *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" readonly>
+                            </div>
+                            <small class="text-muted">Identificador primário usado para tentativas de login</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="current_password" class="form-label">Senha Atual *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" class="form-control" id="current_password" name="current_password" required>
+                            </div>
+                            <small class="text-muted">Senha atual usada para sua autenticação</small>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="new_password" class="form-label">Nova Senha *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            </div>
+                            <small class="text-muted">Nova senha que você gostaria de usar no futuro</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="repeat_new_password" class="form-label">Repita a Nova Senha *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" class="form-control" id="repeat_new_password" name="repeat_new_password" required>
+                            </div>
+                            <small class="text-muted">Nova senha que você gostaria de usar no futuro</small>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" id="alterar-propriedades-do-perfil">Alterar Propriedades do Perfil</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('user_profile') }}">
+                    <input type="hidden" name="action" value="update_profile">
+                    <p>Preencha o formulário abaixo e pressione o botão Salvar para criar ou atualizar o registro.</p>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="full_name" class="form-label">Nome Completo</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.name }}">
+                            </div>
+                            <small class="text-muted">Nome completo do usuário</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Departamento</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                <input type="text" class="form-control" id="department" name="department" value="{{ user.department }}">
+                            </div>
+                            <small class="text-muted">Departamento do usuário</small>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

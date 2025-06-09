@@ -17,6 +17,7 @@
             <div class="card-body">
                 <h5 class="card-title">Identificador: {{ device.id }}</h5>
                 <hr>
+                <p>Circuito: {{ circuit_map[device.circuit_id] if device.circuit_id and device.circuit_id in circuit_map else '-' }}</p>
                 <p>Instalação: {{ device.installation }}</p>
                 <p>Última mensagem: {{ device.last_message }}</p>
                 <p>Estado: <span class="badge {% if device.status == 'ONLINE' %}bg-success{% else %}bg-danger{% endif %}">{{ device.status }}</span></p>

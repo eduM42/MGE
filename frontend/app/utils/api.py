@@ -31,3 +31,8 @@ def api_delete(path):
     url = f"{BACKEND_URL}{path}"
     headers = get_headers()
     return requests.delete(url, headers=headers)
+
+def api_patch(path, data=None, json=None):
+    url = f"{BACKEND_URL}{path}"
+    headers = get_headers()
+    return requests.patch(url, data=data, json=json, headers=headers)

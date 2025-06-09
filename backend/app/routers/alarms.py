@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from ..models import models, schemas
 from ..database import get_db
@@ -10,7 +10,10 @@ router = APIRouter(prefix="/alarms", tags=["alarms"])
 
 @router.post("/", response_model=schemas.AlarmRead, status_code=status.HTTP_201_CREATED)
 def create_alarm(alarm: schemas.AlarmCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    db_alarm = models.Alarm(**alarm.dict(by_alias=True))
+    alarm_data = alarm.dict(by_alias=True)
+    if 'global' in alarm_data:
+        alarm_data['global_'] = alarm_data.pop('global')
+    db_alarm = models.Alarm(**alarm_data)
     db.add(db_alarm)
     db.commit()
     db.refresh(db_alarm)
@@ -32,8 +35,26 @@ def update_alarm(alarm_id: UUID, alarm_update: schemas.AlarmCreate, db: Session 
     alarm = db.query(models.Alarm).filter(models.Alarm.id == alarm_id).first()
     if not alarm:
         raise HTTPException(status_code=404, detail="Alarm not found")
-    for key, value in alarm_update.dict(by_alias=True).items():
+    update_data = alarm_update.dict(by_alias=True)
+    if 'global' in update_data:
+        update_data['global_'] = update_data.pop('global')
+    for key, value in update_data.items():
         setattr(alarm, key, value)
+    db.commit()
+    db.refresh(alarm)
+    return alarm
+
+@router.patch("/{alarm_id}", response_model=schemas.AlarmRead)
+def patch_alarm(alarm_id: UUID, patch_data: dict = Body(...), db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    alarm = db.query(models.Alarm).filter(models.Alarm.id == alarm_id).first()
+    if not alarm:
+        raise HTTPException(status_code=404, detail="Alarm not found")
+    # Map 'global' to 'global_' if present
+    if 'global' in patch_data:
+        patch_data['global_'] = patch_data.pop('global')
+    for key, value in patch_data.items():
+        if hasattr(alarm, key):
+            setattr(alarm, key, value)
     db.commit()
     db.refresh(alarm)
     return alarm

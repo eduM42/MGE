@@ -35,9 +35,9 @@
                         <tr>
                             <td>{{ device.id }}</td>
                             <td>{{ device.pretty_name }}</td>
-                            <td>{{ device.circuit_id or '-' }}</td>
+                            <td>{{ circuit_map[device.circuit_id] if device.circuit_id and device.circuit_id in circuit_map else '-' }}</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-primary">Detalhes</a>
+                                <a href="{{ url_for('devices.device_details', device_id=device.id) }}" class="btn btn-sm btn-primary">Detalhes</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -59,7 +59,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="registerDeviceForm" method="POST" action="{{ url_for('register_device') }}">
+                    <form id="registerDeviceForm" method="POST" action="{{ url_for('devices.register_device') }}">
                         <div class="mb-3">
                             <label for="prettyName" class="form-label">Nome do dispositivo</label>
                             <input type="text" class="form-control" id="prettyName" name="pretty_name" placeholder="Insira um nome para o dispositivo" required>

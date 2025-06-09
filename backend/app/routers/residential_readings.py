@@ -1,15 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from ..models import models, schemas
 from ..database import get_db
 from typing import List
 from uuid import UUID
 from .auth import get_current_user
+from app.event_handlers.alarmHandler import handle_new_measurement
+from app.database import SessionLocal
 
 router = APIRouter(prefix="/residential_readings", tags=["residential_readings"])
 
+def handle_new_measurement_sync(device_id, measured_data):
+    session = SessionLocal()
+    try:
+        handle_new_measurement(session, device_id, measured_data)
+    finally:
+        session.close()
+
 @router.post("/", response_model=schemas.ResidentialReadingRead, status_code=status.HTTP_201_CREATED)
-def create_reading(reading: schemas.ResidentialReadingCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def create_reading(reading: schemas.ResidentialReadingCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user), background_tasks: BackgroundTasks = None):
     # Only allow if user owns or has access to the device
     device = db.query(models.Device).filter(models.Device.id == reading.device_id).first()
     has_access = device and ((device.user_id == current_user.id) or db.query(models.UserDeviceAccess).filter_by(user_id=current_user.id, device_id=reading.device_id).first())
@@ -19,6 +28,9 @@ def create_reading(reading: schemas.ResidentialReadingCreate, db: Session = Depe
     db.add(db_reading)
     db.commit()
     db.refresh(db_reading)
+    # Call alarm handler in the background
+    if background_tasks is not None:
+        background_tasks.add_task(handle_new_measurement_sync, reading.device_id, reading.dict())
     return db_reading
 
 @router.get("/", response_model=List[schemas.ResidentialReadingRead])

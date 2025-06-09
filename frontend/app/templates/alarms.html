@@ -43,6 +43,8 @@
                         <th>Nome</th>
                         <th>Descrição</th>
                         <th>Tipo</th>
+                        <th>Dispositivo</th>
+                        <th>Threshold</th>
                         <th>Estado</th>
                         <th>Ações</th>
                     </tr>
@@ -53,14 +55,21 @@
                         <td>{{ alarm.name }}</td>
                         <td>{{ alarm.description }}</td>
                         <td>{{ alarm.type }}</td>
+                        <td>{% if alarm.device_id %}{{ alarm.device_id }}{% else %}Global{% endif %}</td>
+                        <td>{{ alarm.threshold }}</td>
                         <td>
-                            <span class="badge {% if alarm.active %}bg-success{% else %}bg-danger{% endif %}">
-                                {{ 'Ativo' if alarm.active else 'Inativo' }}
-                            </span>
+                            <form method="POST" action="{{ url_for('alarms.toggle_alarm', alarm_id=alarm.id) }}" style="display:inline;">
+                                <input type="hidden" name="active" value="{{ not alarm.active }}">
+                                <button type="submit" class="btn btn-sm {% if alarm.active %}btn-success{% else %}btn-secondary{% endif %}">
+                                    {% if alarm.active %}Desativar{% else %}Ativar{% endif %}
+                                </button>
+                            </form>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-primary">Editar</button>
-                            <button class="btn btn-sm btn-danger">Excluir</button>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editAlarmModal" data-alarm='{{ alarm | tojson }}'>Editar</button>
+                            <form method="POST" action="{{ url_for('alarms.delete_alarm', alarm_id=alarm.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -70,7 +79,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- New Alarm Modal -->
 <div class="modal fade" id="newAlarmModal" tabindex="-1" aria-labelledby="newAlarmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -79,7 +88,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="newAlarmForm" method="POST" action="{{ url_for('views.create_alarm') }}">
+                <form id="newAlarmForm" method="POST" action="{{ url_for('alarms.create_alarm') }}">
                     <div class="mb-3">
                         <label for="alarmName" class="form-label">Nome do alarme</label>
                         <input type="text" class="form-control" id="alarmName" name="alarm_name" placeholder="Insira um nome para o alarme">
@@ -87,6 +96,27 @@
                     <div class="mb-3">
                         <label for="alarmDescription" class="form-label">Descrição</label>
                         <input type="text" class="form-control" id="alarmDescription" name="alarm_description" placeholder="Insira uma descrição para o alarme">
+                    </div>
+                    <div class="mb-3">
+                        <label for="alarmType" class="form-label">Tipo de alarme</label>
+                        <select class="form-select" id="alarmType" name="alarm_type">
+                            <option value="consumo">Consumo elétrico</option>
+                            <option value="tensao">Pico de tensão</option>
+                            <option value="potencia">Pico de potência</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="threshold" class="form-label">Threshold</label>
+                        <input type="number" step="any" class="form-control" id="threshold" name="threshold" placeholder="Valor limite para disparo">
+                    </div>
+                    <div class="mb-3">
+                        <label for="deviceId" class="form-label">Dispositivo</label>
+                        <select class="form-select" id="deviceId" name="device_id">
+                            <option value="">Global</option>
+                            {% for device in devices %}
+                                <option value="{{ device.id }}">{{ device.pretty_name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="activateImmediately" name="activate_immediately">
@@ -106,15 +136,6 @@
                             <label class="form-check-label" for="sendWhatsApp">Enviar via WhatsApp</label>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="alarmType" class="form-label">Tipo de alarme</label>
-                        <select class="form-select" id="alarmType" name="alarm_type">
-                            <option>Dropdown option</option>
-                            <option selected>Consumo elétrico</option>
-                            <option>Pico de tensão</option>
-                            <option>Pico de potência</option>
-                        </select>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -124,14 +145,124 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Alarm Modal -->
+<div class="modal fade" id="editAlarmModal" tabindex="-1" aria-labelledby="editAlarmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAlarmModalLabel">Editar Alarme</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editAlarmForm" method="POST" action="">
+                    <input type="hidden" name="alarm_id" id="editAlarmId">
+                    <div class="mb-3">
+                        <label for="editAlarmName" class="form-label">Nome do alarme</label>
+                        <input type="text" class="form-control" id="editAlarmName" name="alarm_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAlarmDescription" class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="editAlarmDescription" name="alarm_description">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAlarmType" class="form-label">Tipo de alarme</label>
+                        <select class="form-select" id="editAlarmType" name="alarm_type">
+                            <option value="consumo">Consumo elétrico</option>
+                            <option value="tensao">Pico de tensão</option>
+                            <option value="potencia">Pico de potência</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editThreshold" class="form-label">Threshold</label>
+                        <input type="number" step="any" class="form-control" id="editThreshold" name="threshold">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDeviceId" class="form-label">Dispositivo</label>
+                        <select class="form-select" id="editDeviceId" name="device_id">
+                            <option value="">Global</option>
+                            {% for device in devices %}
+                                <option value="{{ device.id }}">{{ device.pretty_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="editActivateImmediately" name="activate_immediately">
+                        <label class="form-check-label" for="editActivateImmediately">Ativar</label>
+                    </div>
+                    <div class="mb-3 border p-3 rounded">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editSendSMS" name="send_sms">
+                            <label class="form-check-label" for="editSendSMS">Enviar via SMS</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editSendEmail" name="send_email">
+                            <label class="form-check-label" for="editSendEmail">Enviar via email</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editSendWhatsApp" name="send_whatsapp">
+                            <label class="form-check-label" for="editSendWhatsApp">Enviar via WhatsApp</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="editAlarmForm" class="btn btn-primary">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Triggered Alarms Table -->
+<div class="card content-card mt-4">
+    <div class="card-header">Alarmes Disparados</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Alarme</th>
+                        <th>Dispositivo</th>
+                        <th>Valor Medido</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trig in triggered_alarms %}
+                    <tr>
+                        <td>{{ trig.triggered_at }}</td>
+                        <td>{{ trig.alarm_name }}</td>
+                        <td>{{ trig.device_name }}</td>
+                        <td>{{ trig.measured_value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var myModal = new bootstrap.Modal(document.getElementById('newAlarmModal'));
-        
-        // You can add any additional JavaScript for form handling here
+        var editAlarmModal = document.getElementById('editAlarmModal');
+        editAlarmModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var alarm = JSON.parse(button.getAttribute('data-alarm'));
+            document.getElementById('editAlarmId').value = alarm.id;
+            document.getElementById('editAlarmName').value = alarm.name;
+            document.getElementById('editAlarmDescription').value = alarm.description;
+            document.getElementById('editAlarmType').value = alarm.type;
+            document.getElementById('editThreshold').value = alarm.threshold;
+            document.getElementById('editDeviceId').value = alarm.device_id || '';
+            document.getElementById('editActivateImmediately').checked = alarm.active;
+            document.getElementById('editSendSMS').checked = alarm.send_sms || false;
+            document.getElementById('editSendEmail').checked = alarm.send_email || false;
+            document.getElementById('editSendWhatsApp').checked = alarm.send_whatsapp || false;
+            document.getElementById('editAlarmForm').action = '/alarms/edit/' + alarm.id;
+        });
     });
 </script>
 {% endblock %}

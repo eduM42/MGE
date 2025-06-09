@@ -12,7 +12,7 @@ def login():
         if resp.status_code == 200:
             token = resp.json()['access_token']
             session['access_token'] = token
-            return redirect(url_for('index'))
+            return redirect(url_for('devices.index'))
         else:
             flash('Usuário ou senha inválidos', 'danger')
     return render_template('login.html')
@@ -43,3 +43,19 @@ def register():
 def logout():
     session.pop('access_token', None)
     return redirect(url_for('auth.login'))
+
+@auth_bp.route('/user_profile', methods=['GET', 'POST'])
+def user_profile():
+    from app.utils.api import api_get
+    from app.helpers.navbarHelper import get_navbar_state
+    if 'access_token' not in session:
+        return redirect(url_for('auth.login'))
+    user_resp = api_get('/auth/me')
+    if user_resp.status_code != 200:
+        flash('Não foi possível obter informações do usuário. Faça login novamente.', 'danger')
+        session.pop('access_token', None)
+        return redirect(url_for('auth.login'))
+    user = user_resp.json()
+    navbar_state = get_navbar_state()
+    # TODO: handle POST for profile update and password change
+    return render_template('user_profile.html', user=user, navbar_state=navbar_state, active_page='user_profile')

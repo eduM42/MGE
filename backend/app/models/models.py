@@ -88,12 +88,14 @@ class Alarm(Base):
     __tablename__ = 'alarms'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
+    description = Column(Text)  # Added field
     threshold = Column(Numeric(10,2), nullable=False)
     type = Column(String(50), nullable=False)
     global_ = Column('global', Boolean, default=False, nullable=False)
     device_id = Column(UUID(as_uuid=True), ForeignKey('devices.id', ondelete='CASCADE'), nullable=True)
     organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id', ondelete='CASCADE'), nullable=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
+    active = Column(Boolean, default=True, nullable=False)  # Added field
     device = relationship('Device', back_populates='alarms')
     organization = relationship('Organization', back_populates='alarms')
     user = relationship('User', back_populates='alarms')

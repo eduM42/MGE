@@ -49,7 +49,7 @@
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="{{ url_for('devices') }}" class="sidebar-link {% if active_page == 'devices' %}active{% endif %}">
+                    <a href="{{ url_for('devices.devices') }}" class="sidebar-link {% if active_page == 'devices' %}active{% endif %}">
                         <i class="bi bi-cpu"></i>
                         <span>Dispositivos</span>
                     </a>
@@ -61,7 +61,7 @@
                     </a>
                 </li>
                 <li class="sidebar-item"></li>
-                    <a href="#" class="sidebar-link {% if active_page == 'alarms' %}active{% endif %}">
+                    <a href="{{ url_for('alarms.alarms') }}" class="sidebar-link {% if active_page == 'alarms' %}active{% endif %}">
                         <i class="bi bi-bell-fill"></i>
                         <span>Alarmes</span>
                     </a>
@@ -85,7 +85,7 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="{{ url_for('user_profile') }}" class="sidebar-link {% if active_page == 'user_profile' %}active{% endif %}">
+                    <a href="{{ url_for('auth.user_profile') }}" class="sidebar-link {% if active_page == 'user_profile' %}active{% endif %}">
                         <i class="bi bi-person-circle"></i>
                         <span>Perfil</span>
                     </a>

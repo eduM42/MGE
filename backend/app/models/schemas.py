@@ -117,12 +117,14 @@ class SensorPacketRead(SensorPacketBase):
 # --- Alarm ---
 class AlarmBase(BaseModel):
     name: str
+    description: Optional[str] = None
     threshold: Decimal
     type: str
     global_: bool = Field(False, alias='global')
     device_id: Optional[UUID4] = None
     organization_id: Optional[UUID4] = None
     user_id: Optional[UUID4] = None
+    active: Optional[bool] = True
 
 class AlarmCreate(AlarmBase):
     pass
@@ -145,6 +147,8 @@ class TriggeredAlarmCreate(TriggeredAlarmBase):
 
 class TriggeredAlarmRead(TriggeredAlarmBase):
     id: int
+    alarm_name: str
+    device_name: str
     class Config:
         from_attributes = True
 

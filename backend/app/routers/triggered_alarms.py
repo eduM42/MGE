@@ -26,7 +26,17 @@ def list_triggered_alarms(skip: int = 0, limit: int = 100, db: Session = Depends
     # Only return triggered alarms for devices the user owns or has access to
     owned_devices = db.query(models.Device.id).filter(models.Device.user_id == current_user.id)
     permitted_devices = db.query(models.UserDeviceAccess.device_id).filter(models.UserDeviceAccess.user_id == current_user.id)
-    return db.query(models.TriggeredAlarm).filter(models.TriggeredAlarm.device_id.in_(owned_devices.union(permitted_devices))).offset(skip).limit(limit).all()
+    triggered_alarms = db.query(models.TriggeredAlarm).filter(models.TriggeredAlarm.device_id.in_(owned_devices.union(permitted_devices))).offset(skip).limit(limit).all()
+    # Attach device_name and alarm_name
+    result = []
+    for ta in triggered_alarms:
+        device_name = ta.device.pretty_name if ta.device else str(ta.device_id)
+        alarm_name = ta.alarm.name if ta.alarm else str(ta.alarm_id)
+        ta_dict = ta.__dict__.copy()
+        ta_dict['device_name'] = device_name
+        ta_dict['alarm_name'] = alarm_name
+        result.append(schemas.TriggeredAlarmRead(**ta_dict))
+    return result
 
 @router.get("/{triggered_id}", response_model=schemas.TriggeredAlarmRead)
 def get_triggered_alarm(triggered_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

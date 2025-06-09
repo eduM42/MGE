@@ -36,7 +36,7 @@
                 <h5 class="mb-0" id="alterar-senha">Alterar Senha</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('user_profile') }}">
+                <form method="POST" action="{{ url_for('auth.user_profile') }}">
                     <input type="hidden" name="action" value="change_password">
                     <p>Preencha o formulário abaixo e pressione o botão Salvar para criar ou atualizar o registro.</p>
                     <div class="row mb-3">
@@ -87,7 +87,7 @@
                 <h5 class="mb-0" id="alterar-propriedades-do-perfil">Alterar Propriedades do Perfil</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('user_profile') }}">
+                <form method="POST" action="{{ url_for('auth.user_profile') }}">
                     <input type="hidden" name="action" value="update_profile">
                     <p>Preencha o formulário abaixo e pressione o botão Salvar para criar ou atualizar o registro.</p>
                     <div class="row mb-3">

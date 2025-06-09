@@ -110,8 +110,12 @@ def approve_device(device_id: UUID, data: dict = Body(...), db: Session = Depend
     circuit_id = data.get('circuit_id')
     organization_id = data.get('organization_id')
     if circuit_id:
+        if isinstance(circuit_id, str):
+            circuit_id = UUID(circuit_id)
         device.circuit_id = circuit_id
     if organization_id:
+        if isinstance(organization_id, str):
+            organization_id = UUID(organization_id)
         device.organization_id = organization_id
     device.pending = False
     db.commit()

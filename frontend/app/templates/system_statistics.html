@@ -41,7 +41,6 @@
         </div>
     </div>
 
-    <!-- Database Tables Load Card -->
     <div class="col-md-6 mb-4">
         <div class="card">
             <div class="card-header">
@@ -68,26 +67,25 @@
         </div>
     </div>
 
-    <!-- Mass Operations Statistics Card -->
     <div class="col-md-6 mb-4">
         <div class="card">
             <div class="card-header">
-                Estatísticas de Operações em Massa
+                Estatísticas do sistema
             </div>
             <div class="card-body">
                 <table class="table table-striped">
                     <tbody>
                         <tr>
-                            <th>Campanhas Passivas</th>
-                            <td>{{ mass_operations.passive_campaigns }}</td>
+                            <th>Alarmes ativos</th>
+                            <td>{{ system_info.active_alarms }}</td>
                         </tr>
                         <tr>
-                            <th>Campanhas Ativas</th>
-                            <td>{{ mass_operations.active_campaigns }}</td>
+                            <th>Alarmes disparados</th>
+                            <td>{{ system_info.triggered_alarms }}</td>
                         </tr>
                         <tr>
-                            <th>Trabalhos de Firmware</th>
-                            <td>{{ mass_operations.firmware_jobs }}</td>
+                            <th>Dispositvos ativos</th>
+                            <td>{{ system_info.active_devices }}</td>
                         </tr>
                     </tbody>
                 </table>

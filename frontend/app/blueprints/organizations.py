@@ -17,8 +17,11 @@ def organizations():
         return redirect(url_for('devices.index'))
     orgs_resp = api_get('/organizations')
     organizations = orgs_resp.json() if orgs_resp.status_code == 200 else []
+    # Fetch all users for owner selection
+    users_resp = api_get('/users')
+    users = users_resp.json() if users_resp.status_code == 200 else []
     navbar_state = get_navbar_state()
-    return render_template('organizations.html', user=user, organizations=organizations, navbar_state=navbar_state, active_page='organizations')
+    return render_template('organizations.html', user=user, organizations=organizations, users=users, navbar_state=navbar_state, active_page='organizations')
 
 @organizations_bp.route('/organizations/create', methods=['POST'])
 def create_organization():
@@ -26,7 +29,8 @@ def create_organization():
         return redirect(url_for('auth.login'))
     name = request.form.get('name')
     description = request.form.get('description')
-    resp = api_post('/organizations', json={'name': name, 'description': description})
+    owner_id = request.form.get('owner_id')
+    resp = api_post('/organizations', json={'name': name, 'description': description, 'owner_id': owner_id})
     if resp.status_code == 201:
         flash('Organização criada com sucesso!', 'success')
     else:

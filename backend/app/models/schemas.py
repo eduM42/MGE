@@ -7,6 +7,7 @@ from decimal import Decimal
 class OrganizationBase(BaseModel):
     name: str
     description: Optional[str] = None
+    owner_id: Optional[UUID4] = None  # NEW: owner
 
 class OrganizationCreate(OrganizationBase):
     pass
@@ -20,6 +21,8 @@ class OrganizationRead(OrganizationBase):
 # --- Circuit ---
 class CircuitBase(BaseModel):
     name: str
+    user_id: Optional[UUID4] = None  # NEW: user circuit
+    organization_id: Optional[UUID4] = None  # NEW: org circuit
 
 class CircuitCreate(CircuitBase):
     pass

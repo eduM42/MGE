@@ -21,7 +21,20 @@ def create_alarm(alarm: schemas.AlarmCreate, db: Session = Depends(get_db), curr
 
 @router.get("/", response_model=List[schemas.AlarmRead])
 def list_alarms(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    return db.query(models.Alarm).offset(skip).limit(limit).all()
+    # Get device IDs the user owns
+    owned_device_ids = [d.id for d in db.query(models.Device).filter(models.Device.user_id == current_user.id, models.Device.pending == False)]
+    # Get device IDs the user has explicit access to
+    permitted_device_ids = [uda.device_id for uda in db.query(models.UserDeviceAccess).filter(models.UserDeviceAccess.user_id == current_user.id)]
+    # Get device IDs in the user's organization (if any)
+    org_device_ids = []
+    if current_user.organization_id:
+        org_device_ids = [d.id for d in db.query(models.Device).filter(models.Device.organization_id == current_user.organization_id, models.Device.pending == False)]
+    # Union of all accessible device IDs
+    accessible_device_ids = set(owned_device_ids + permitted_device_ids + org_device_ids)
+    if not accessible_device_ids:
+        return []
+    alarms = db.query(models.Alarm).filter(models.Alarm.device_id.in_(accessible_device_ids)).offset(skip).limit(limit).all()
+    return alarms
 
 @router.get("/{alarm_id}", response_model=schemas.AlarmRead)
 def get_alarm(alarm_id: UUID, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

@@ -10,10 +10,26 @@ router = APIRouter(prefix="/organizations", tags=["organizations"])
 
 @router.post("/", response_model=schemas.OrganizationRead, status_code=status.HTTP_201_CREATED)
 def create_organization(org: schemas.OrganizationCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    db_org = models.Organization(**org.dict())
+    # Only admin can create organizations
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admin can create organizations")
+    if not org.owner_id:
+        raise HTTPException(status_code=400, detail="Organization must have an owner")
+    owner = db.query(models.User).filter(models.User.id == org.owner_id).first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner user not found")
+    db_org = models.Organization(
+        name=org.name,
+        description=org.description,
+        owner_id=org.owner_id
+    )
     db.add(db_org)
     db.commit()
     db.refresh(db_org)
+    # Set owner as org_owner and assign organization_id
+    owner.role = 'org_owner'
+    owner.organization_id = db_org.id
+    db.commit()
     return db_org
 
 @router.get("/", response_model=List[schemas.OrganizationRead])

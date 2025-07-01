@@ -5,6 +5,7 @@ from ..database import get_db
 from .auth import get_current_user
 from typing import List
 from uuid import UUID
+from app.utils.system_stats import get_system_statistics
 
 router = APIRouter(prefix="/devices", tags=["devices"])
 
@@ -30,6 +31,14 @@ def register_device_by_device(device: schemas.DeviceRegister, db: Session = Depe
 def create_device(device: schemas.DeviceCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     device_data = device.dict()
     device_data.pop('user_id', None)  # Remove user_id if present
+    # Only allow circuits that belong to the user or their organization
+    circuit_id = device_data.get('circuit_id')
+    if circuit_id:
+        circuit = db.query(models.Circuit).filter(models.Circuit.id == circuit_id).first()
+        if not circuit:
+            raise HTTPException(status_code=400, detail="Circuit not found")
+        if not ((circuit.user_id and circuit.user_id == current_user.id) or (circuit.organization_id and current_user.organization_id and circuit.organization_id == current_user.organization_id)):
+            raise HTTPException(status_code=403, detail="You can only use your own or your organization's circuits")
     db_device = models.Device(**device_data, user_id=current_user.id)
     db.add(db_device)
     db.commit()
@@ -46,6 +55,10 @@ def list_devices(skip: int = 0, limit: int = 100, db: Session = Depends(get_db),
 @router.get("/pending", response_model=List[schemas.DeviceRead])
 def list_pending_devices(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return db.query(models.Device).filter(models.Device.user_id == current_user.id, models.Device.pending == True).all()
+
+@router.get('/system_stats')
+def system_stats(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return get_system_statistics(db)
 
 @router.get("/{device_id}", response_model=schemas.DeviceRead)
 def get_device(device_id: UUID, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

@@ -161,3 +161,21 @@ def device_details(device_id):
     circuit_map = build_circuit_map(circuits)
     navbar_state = get_navbar_state()
     return render_template('device_details.html', user=user, device=device, circuits=circuits, circuit_map=circuit_map, navbar_state=navbar_state, active_page='devices')
+
+@devices_bp.route('/system_statistics')
+def system_statistics():
+    if 'access_token' not in session:
+        return redirect(url_for('auth.login'))
+    user_resp = api_get('/auth/me')
+    if user_resp.status_code != 200:
+        flash('Não foi possível obter informações do usuário. Faça login novamente.', 'danger')
+        session.pop('access_token', None)
+        return redirect(url_for('auth.login'))
+    user = user_resp.json()
+    stats_resp = api_get('/devices/system_stats')
+    stats = stats_resp.json() if stats_resp.status_code == 200 else {}
+    navbar_state = get_navbar_state()
+    return render_template('system_statistics.html', user=user, navbar_state=navbar_state, active_page='system_statistics',
+                           system_info=stats.get('system_info', {}),
+                           database_tables=stats.get('database_tables', []),
+                           processes=stats.get('processes', []))

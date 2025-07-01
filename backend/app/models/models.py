@@ -12,14 +12,21 @@ class Organization(Base):
     name = Column(String(255), unique=True, nullable=False)
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
-    users = relationship('User', back_populates='organization')
+    owner_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    owner = relationship('User', foreign_keys=[owner_id])
+    users = relationship('User', back_populates='organization', foreign_keys='User.organization_id')
     devices = relationship('Device', back_populates='organization')
     alarms = relationship('Alarm', back_populates='organization')
+    circuits = relationship('Circuit', back_populates='organization', foreign_keys='Circuit.organization_id')
 
 class Circuit(Base):
     __tablename__ = 'circuits'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), unique=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)  # NEW: user circuit
+    organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id', ondelete='SET NULL'), nullable=True)  # NEW: org circuit
+    user = relationship('User', back_populates='circuits', foreign_keys=[user_id])
+    organization = relationship('Organization', back_populates='circuits', foreign_keys=[organization_id])
     devices = relationship('Device', back_populates='circuit')
 
 class User(Base):
@@ -32,12 +39,13 @@ class User(Base):
     address = Column(Text)
     is_residential = Column(Boolean, default=True, nullable=False)
     organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id', ondelete='SET NULL'), nullable=True)
-    organization = relationship('Organization', back_populates='users')
+    organization = relationship('Organization', back_populates='users', foreign_keys=[organization_id])
     devices = relationship('Device', back_populates='user')
     alarms = relationship('Alarm', back_populates='user')
     device_access = relationship('UserDeviceAccess', back_populates='user')
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(32), nullable=False, default='common_user')  # 'admin', 'org_owner', 'common_user'
+    circuits = relationship('Circuit', back_populates='user', foreign_keys='Circuit.user_id')
 
 class Device(Base):
     __tablename__ = 'devices'

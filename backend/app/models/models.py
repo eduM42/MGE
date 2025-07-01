@@ -37,6 +37,7 @@ class User(Base):
     alarms = relationship('Alarm', back_populates='user')
     device_access = relationship('UserDeviceAccess', back_populates='user')
     hashed_password = Column(String(255), nullable=False)
+    role = Column(String(32), nullable=False, default='common_user')  # 'admin', 'org_owner', 'common_user'
 
 class Device(Base):
     __tablename__ = 'devices'

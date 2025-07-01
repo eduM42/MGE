@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Circuitos{% endblock %}
+{% block page_title %}Gerenciar Circuitos{% endblock %}
+
+{% block content %}
+<div class="card rounded-3 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCircuitModal">
+                <i class="bi bi-plus-circle me-2"></i>Criar novo circuito
+            </button>
+        </div>
+        {% if circuits and circuits|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for circuit in circuits %}
+                    <tr>
+                        <td>{{ circuit.id }}</td>
+                        <td>{{ circuit.name }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editCircuitModal{{ circuit.id }}">Editar</button>
+                            <form method="POST" action="{{ url_for('circuits.delete_circuit', circuit_id=circuit.id) }}" style="display:inline-block;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja remover este circuito?')">Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editCircuitModal{{ circuit.id }}" tabindex="-1" aria-labelledby="editCircuitModalLabel{{ circuit.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="POST" action="{{ url_for('circuits.edit_circuit', circuit_id=circuit.id) }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editCircuitModalLabel{{ circuit.id }}">Editar Circuito</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="name{{ circuit.id }}" class="form-label">Nome</label>
+                                            <input type="text" class="form-control" id="name{{ circuit.id }}" name="name" value="{{ circuit.name }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">Nenhum circuito cadastrado.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Create Modal -->
+<div class="modal fade" id="createCircuitModal" tabindex="-1" aria-labelledby="createCircuitModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('circuits.create_circuit') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createCircuitModalLabel">Criar Circuito</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

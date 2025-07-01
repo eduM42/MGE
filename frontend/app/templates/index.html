@@ -12,6 +12,37 @@
     {% block page_title %}Meus Dispositivos{% endblock %}
 
     {% block content %}
+    {% if triggered_alarms and triggered_alarms|length > 0 %}
+    <div class="card mb-4 border-danger">
+        <div class="card-header bg-danger text-white">
+            <strong>Alarmes Ativos</strong>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered mb-0">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>Dispositivo</th>
+                            <th>Alarme</th>
+                            <th>Descrição</th>
+                            <th>Data/Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alarm in triggered_alarms %}
+                        <tr>
+                            <td>{{ alarm.device_name or alarm.device_id }}</td>
+                            <td>{{ alarm.alarm_name or alarm.alarm_id }}</td>
+                            <td>{{ alarm.description or '-' }}</td>
+                            <td>{{ alarm.triggered_at or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="card rounded-3 shadow-sm">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">

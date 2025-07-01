@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Organizações{% endblock %}
+{% block page_title %}Gerenciar Organizações{% endblock %}
+
+{% block content %}
+<div class="card rounded-3 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrgModal">
+                <i class="bi bi-plus-circle me-2"></i>Criar nova organização
+            </button>
+        </div>
+        {% if organizations and organizations|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for org in organizations %}
+                    <tr>
+                        <td>{{ org.id }}</td>
+                        <td>{{ org.name }}</td>
+                        <td>{{ org.description or '-' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ org.id }}">Editar</button>
+                            <form method="POST" action="{{ url_for('organizations.delete_organization', org_id=org.id) }}" style="display:inline-block;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja remover esta organização?')">Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editOrgModal{{ org.id }}" tabindex="-1" aria-labelledby="editOrgModalLabel{{ org.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="POST" action="{{ url_for('organizations.edit_organization', org_id=org.id) }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editOrgModalLabel{{ org.id }}">Editar Organização</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="name{{ org.id }}" class="form-label">Nome</label>
+                                            <input type="text" class="form-control" id="name{{ org.id }}" name="name" value="{{ org.name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="description{{ org.id }}" class="form-label">Descrição</label>
+                                            <textarea class="form-control" id="description{{ org.id }}" name="description">{{ org.description }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">Nenhuma organização cadastrada.</div>
+        {% endif %}
+    </div>
+</div>
+<!-- Create Modal -->
+<div class="modal fade" id="createOrgModal" tabindex="-1" aria-labelledby="createOrgModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('organizations.create_organization') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createOrgModalLabel">Criar Organização</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

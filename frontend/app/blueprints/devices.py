@@ -28,9 +28,11 @@ def index():
     circuits = circuits_resp.json() if circuits_resp.status_code == 200 else []
     orgs_resp = api_get('/organizations')
     organizations = orgs_resp.json() if orgs_resp.status_code == 200 else []
+    triggered_alarms_resp = api_get('/triggered_alarms')
+    triggered_alarms = triggered_alarms_resp.json() if triggered_alarms_resp.status_code == 200 else []
     circuit_map = build_circuit_map(circuits)
     navbar_state = get_navbar_state()
-    return render_template('index.html', user=user, devices=devices, navbar_state=navbar_state, active_page='home', circuits=circuits, organizations=organizations, circuit_map=circuit_map)
+    return render_template('index.html', user=user, devices=devices, navbar_state=navbar_state, active_page='home', circuits=circuits, organizations=organizations, circuit_map=circuit_map, triggered_alarms=triggered_alarms)
 
 @devices_bp.route('/register_device', methods=['POST'])
 def register_device():

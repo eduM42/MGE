@@ -31,7 +31,7 @@
 {% block content %}
 <div class="card rounded-3 shadow-sm">
     <div class="card-body">
-        <form action="{{ url_for('views.export_measurements') }}" method="POST">
+        <form action="{{ url_for('export.export_measurements') }}" method="POST">
             <div class="mb-3">
                 <label for="file_format" class="form-label">Formato do arquivo</label>
                 <select class="form-select" id="file_format" name="file_format">

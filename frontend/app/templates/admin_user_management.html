@@ -1,30 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Gerenciamento de usuários{% endblock %}
-{% block page_title %}Gerenciamento de usuários{% endblock %}
-
-{% block extra_css %}
-.form-check-input:checked {
-    background-color: #8e44ad;
-    border-color: #8e44ad;
-}
-.btn-primary {
-    background-color: #8e44ad;
-    border-color: #8e44ad;
-}
-.btn-primary:hover {
-    background-color: #7d3c98;
-    border-color: #7d3c98;
-}
-.btn-outline-secondary {
-    color: #8e44ad;
-    border-color: #8e44ad;
-}
-.btn-outline-secondary:hover {
-    color: #fff;
-    background-color: #8e44ad;
-    border-color: #8e44ad;
-}
-{% endblock %}
+{% block title %}Administração de usuários{% endblock %}
+{% block page_title %}Administração de Usuários{% endblock %}
 
 {% block content %}
 <div class="card content-card">
@@ -34,7 +10,6 @@
                 <i class="bi bi-plus-circle me-2"></i>Criar usuário
             </button>
         </div>
-
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -57,9 +32,7 @@
                         <td>{% for org in organizations %}{% if org.id == user.organization_id %}{{ org.name }}{% endif %}{% endfor %}</td>
                         <td>
                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal{{ user.id }}">Editar</button>
-                            <form action="{{ url_for('user_management.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-                            </form>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">Excluir</button>
                         </td>
                     </tr>
 
@@ -104,6 +77,27 @@
                                         <button type="submit" class="btn btn-primary">Salvar alterações</button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete User Modal -->
+                    <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Apagar usuário: {{ user.username }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Tem certeza que deseja apagar este usuário? Esta ação não pode ser desfeita.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <form action="{{ url_for('user_management.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger">Apagar</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -170,11 +164,7 @@
 
 {% block extra_js %}
 <script>
-// Ensure only one modal is open at a time for edit
-// Fixes Bootstrap modal stacking issues
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Fix for dynamically generated modals: remove 'show' class from all modals on close
     var modals = document.querySelectorAll('.modal');
     modals.forEach(function(modal) {
         modal.addEventListener('hidden.bs.modal', function () {

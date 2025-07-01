@@ -38,6 +38,7 @@ class UserBase(BaseModel):
     address: Optional[str] = None
     is_residential: bool = True
     organization_id: Optional[UUID4] = None
+    role: str = 'common_user'  # 'admin', 'org_owner', 'common_user'
 
 class UserCreate(UserBase):
     password: SecretStr

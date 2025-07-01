@@ -55,7 +55,13 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link {% if active_page == 'export' %}active{% endif %}">
+                    <a href="{{ url_for('circuits.circuits') }}" class="sidebar-link {% if active_page == 'circuits' %}active{% endif %}">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>Circuitos</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('export.export_measurements') }}" class="sidebar-link {% if active_page == 'export' %}active{% endif %}">
                         <i class="bi bi-file-earmark-arrow-down-fill"></i>
                         <span>Exportar medições</span>
                     </a>
@@ -91,12 +97,25 @@
                     </a>
                 </li>
                 {% if user.role == 'admin' %}
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
-                            <i class="bi bi-people-fill"></i>
-                            <span>Usuários</span>
-                        </a>
-                    </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('organizations.organizations') }}" class="sidebar-link {% if active_page == 'organizations' %}active{% endif %}">
+                        <i class="bi bi-building"></i>
+                        <span>Organizações</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('user_management.admin_user_management') }}" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Usuários (Admin)</span>
+                    </a>
+                </li>
+                {% elif user.role == 'org_owner' %}
+                <li class="sidebar-item">
+                    <a href="{{ url_for('user_management.org_user_management') }}" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Usuários (Organização)</span>
+                    </a>
+                </li>
                 {% endif %}
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">

@@ -35,7 +35,8 @@ def create_default_admin(db: Session):
             username='admin',
             email='admin@example.com',
             hashed_password=get_password_hash('admin'),
-            is_residential=False
+            is_residential=False,
+            role='admin'
         )
         db.add(admin_user)
         db.commit()

@@ -33,9 +33,108 @@
                             <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">Excluir</button>
                         </td>
                     </tr>
+
+                    <!-- Edit User Modal -->
+                    <div class="modal fade" id="editUserModal{{ user.id }}" tabindex="-1" aria-labelledby="editUserModalLabel{{ user.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editUserModalLabel{{ user.id }}">Editar usuário: {{ user.username }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="{{ url_for('user_management.edit_user', user_id=user.id) }}" method="POST">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="name{{ user.id }}" class="form-label">Nome</label>
+                                            <input type="text" class="form-control" id="name{{ user.id }}" name="name" value="{{ user.name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email{{ user.id }}" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email{{ user.id }}" name="email" value="{{ user.email }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="role{{ user.id }}" class="form-label">Papel</label>
+                                            <select class="form-select" id="role{{ user.id }}" name="role" required>
+                                                <option value="common_user" {% if user.role == 'common_user' %}selected{% endif %}>Usuário</option>
+                                                <option value="org_owner" {% if user.role == 'org_owner' %}selected{% endif %}>Org Owner</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete User Modal -->
+                    <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Apagar usuário: {{ user.username }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Tem certeza que deseja apagar este usuário? Esta ação não pode ser desfeita.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <form action="{{ url_for('user_management.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger">Apagar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Criar novo usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('user_management.create_user') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="create_name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="create_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create_username" class="form-label">Nome de usuário</label>
+                        <input type="text" class="form-control" id="create_username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="create_email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create_password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="create_password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create_role" class="form-label">Papel</label>
+                        <select class="form-select" id="create_role" name="role" required>
+                            <option value="common_user">Usuário</option>
+                            <option value="org_owner">Org Owner</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar usuário</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

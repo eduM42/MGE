@@ -106,7 +106,7 @@ class ResidentialReadingRead(ResidentialReadingBase):
 
 # --- SensorPacket ---
 class SensorPacketBase(BaseModel):
-    device_id: UUID4
+    sensor_id: UUID4
     readings: Any
 
 class SensorPacketCreate(SensorPacketBase):

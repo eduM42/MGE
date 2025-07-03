@@ -21,10 +21,17 @@
                 <p>Instalação: {{ device.installation }}</p>
                 <p>Última mensagem: {{ device.last_message }}</p>
                 <p>Estado: <span class="badge {% if device.status == 'ONLINE' %}bg-success{% else %}bg-danger{% endif %}">{{ device.status }}</span></p>
-                <p>Potência: {{ device.power }}</p>
-                <p>Tensão: {{ device.voltage }}</p>
-                <p>Corrente: {{ device.current }}</p>
-                <p>Consumo total: {{ device.total_consumption }}</p>
+                {% if latest_measurement %}
+                <div class="alert alert-light mb-2 p-2">
+                    <strong>Medições recentes:</strong><br>
+                    Potência: {{ latest_measurement.power or '-' }}<br>
+                    Tensão: {{ latest_measurement.voltage or '-' }}<br>
+                    Corrente: {{ latest_measurement.current or '-' }}<br>
+                    Consumo: {{ latest_measurement.energy_consumption or '-' }}
+                </div>
+                {% else %}
+                <div class="alert alert-warning mb-2 p-2">Sem medições recentes.</div>
+                {% endif %}
             </div>
         </div>
     </div>

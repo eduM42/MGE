@@ -100,12 +100,39 @@
                             <small class="text-muted">Nome completo do usuário</small>
                         </div>
                         <div class="col-md-6">
-                            <label for="department" class="form-label">Departamento</label>
+                            <label for="email" class="form-label">Email</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                <input type="text" class="form-control" id="department" name="department" value="{{ user.department }}">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" readonly>
                             </div>
-                            <small class="text-muted">Departamento do usuário</small>
+                            <small class="text-muted">Email do usuário (não editável)</small>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Telefone</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text" class="form-control" id="phone" name="phone" value="{{ user.phone or '' }}">
+                            </div>
+                            <small class="text-muted">Telefone do usuário</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="address" class="form-label">Endereço</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" class="form-control" id="address" name="address" value="{{ user.address or '' }}">
+                            </div>
+                            <small class="text-muted">Endereço do usuário</small>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_residential" name="is_residential" {% if user.is_residential %}checked{% endif %}>
+                                <label class="form-check-label" for="is_residential">Residencial</label>
+                            </div>
+                            <small class="text-muted">Marque se o usuário é residencial</small>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Salvar</button>

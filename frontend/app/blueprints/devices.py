@@ -151,16 +151,27 @@ def device_details(device_id):
         session.pop('access_token', None)
         return redirect(url_for('auth.login'))
     user = user_resp.json()
+    # Trigger measurement processing for all devices (could be optimized to just this device)
+    api_post('/measurements/process_latest')
     device_resp = api_get(f'/devices/{device_id}')
     if device_resp.status_code != 200:
         flash('Dispositivo não encontrado.', 'danger')
         return redirect(url_for('devices.index'))
     device = device_resp.json()
+    # Get latest measurement for this device
+    readings_resp = api_get(f'/residential_readings/by_device/{device_id}')
+    latest_measurement = None
+    if readings_resp.status_code == 200:
+        readings = readings_resp.json()
+        if readings:
+            # Sort by timestamp descending, get the latest
+            readings.sort(key=lambda r: r['timestamp'], reverse=True)
+            latest_measurement = readings[0]
     circuits_resp = api_get('/circuits')
     circuits = circuits_resp.json() if circuits_resp.status_code == 200 else []
     circuit_map = build_circuit_map(circuits)
     navbar_state = get_navbar_state()
-    return render_template('device_details.html', user=user, device=device, circuits=circuits, circuit_map=circuit_map, navbar_state=navbar_state, active_page='devices')
+    return render_template('device_details.html', user=user, device=device, circuits=circuits, circuit_map=circuit_map, navbar_state=navbar_state, active_page='devices', latest_measurement=latest_measurement)
 
 @devices_bp.route('/system_statistics')
 def system_statistics():
@@ -179,3 +190,38 @@ def system_statistics():
                            system_info=stats.get('system_info', {}),
                            database_tables=stats.get('database_tables', []),
                            processes=stats.get('processes', []))
+
+@devices_bp.route('/device_overview')
+def device_overview():
+    if 'access_token' not in session:
+        return redirect(url_for('auth.login'))
+    user_resp = api_get('/auth/me')
+    if user_resp.status_code != 200:
+        flash('Não foi possível obter informações do usuário. Faça login novamente.', 'danger')
+        session.pop('access_token', None)
+        return redirect(url_for('auth.login'))
+    user = user_resp.json()
+    # Trigger measurement processing
+    process_resp = api_post('/measurements/process_latest', json={})
+    if process_resp.status_code != 200:
+        flash('Erro ao processar medições.', 'danger')
+    # Get devices and measurements
+    devices_resp = api_get('/devices')
+    devices = devices_resp.json() if devices_resp.status_code == 200 else []
+    pending_resp = api_get('/devices/pending')
+    pending_devices = pending_resp.json() if pending_resp.status_code == 200 else []
+    circuits_resp = api_get('/circuits')
+    circuits = circuits_resp.json() if circuits_resp.status_code == 200 else []
+    orgs_resp = api_get('/organizations')
+    organizations = orgs_resp.json() if orgs_resp.status_code == 200 else []
+    circuit_map = build_circuit_map(circuits)
+    # Fetch latest measurement for each device
+    measurements = {}
+    for device in devices:
+        m_resp = api_get(f"/residential_readings/latest/{device['id']}")
+        if m_resp.status_code == 200:
+            measurements[device['id']] = m_resp.json()
+        else:
+            measurements[device['id']] = None
+    navbar_state = get_navbar_state()
+    return render_template('device_overview.html', user=user, devices=devices, pending_devices=pending_devices, circuits=circuits, organizations=organizations, navbar_state=navbar_state, active_page='devices', circuit_map=circuit_map, measurements=measurements)

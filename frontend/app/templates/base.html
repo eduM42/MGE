@@ -27,6 +27,27 @@
         .spinner-border {
             color: #8e44ad !important;
         }
+        .form-check-input:checked {
+            background-color: #8e44ad;
+            border-color: #8e44ad;
+        }
+        .btn-primary {
+            background-color: #8e44ad;
+            border-color: #8e44ad;
+        }
+        .btn-primary:hover {
+            background-color: #7d3c98;
+            border-color: #7d3c98;
+        }
+        .btn-outline-secondary {
+            color: #8e44ad;
+            border-color: #8e44ad;
+        }
+        .btn-outline-secondary:hover {
+            color: #fff;
+            background-color: #8e44ad;
+            border-color: #8e44ad;
+        }
         {% block extra_css %}{% endblock %}
     </style>
 </head>
@@ -55,6 +76,12 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ url_for('sensors.manage_sensors') }}" class="sidebar-link {% if active_page == 'sensors' %}active{% endif %}">
+                        <i class="bi bi-thermometer-half"></i>
+                        <span>Sensores</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="{{ url_for('circuits.circuits') }}" class="sidebar-link {% if active_page == 'circuits' %}active{% endif %}">
                         <i class="bi bi-diagram-3"></i>
                         <span>Circuitos</span>
@@ -73,69 +100,96 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown {% if active_page == 'system_statistics' %}active{% endif %}" data-bs-toggle="collapse"
-                        data-bs-target="#monitoring" aria-expanded="false" aria-controls="monitoring">
+                    <a href="{{ url_for('devices.system_statistics') }}" class="sidebar-link">
                         <i class="bi bi-graph-up"></i>
-                        <span>Monitoramento</span>
-                    </a>
-                    <ul id="monitoring" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Estatísticas básicas</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Estatísitcas avançadas</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="{{ url_for('devices.system_statistics') }}" class="sidebar-link">Estatísitcas de sistema</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ url_for('auth.user_profile') }}" class="sidebar-link {% if active_page == 'user_profile' %}active{% endif %}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Perfil</span>
+                        <span>Estatísitcas de sistema</span>
                     </a>
                 </li>
-                {% if user.role == 'admin' %}
-                <li class="sidebar-item">
-                    <a href="{{ url_for('organizations.organizations') }}" class="sidebar-link {% if active_page == 'organizations' %}active{% endif %}">
-                        <i class="bi bi-building"></i>
-                        <span>Organizações</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ url_for('user_management.admin_user_management') }}" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Usuários (Admin)</span>
-                    </a>
-                </li>
-                {% elif user.role == 'org_owner' %}
-                <li class="sidebar-item">
-                    <a href="{{ url_for('user_management.org_user_management') }}" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Usuários (Organização)</span>
-                    </a>
-                </li>
-                {% endif %}
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="bi bi-gear-fill"></i>
-                        <span>Configurações</span>
-                    </a>
-                </li>
-            </ul>
-            <div class="sidebar-footer">
-                <button class="toggle-btn" type="button" id="sidebarToggle">
-                    <i class="bi bi-arrow-left-square-fill"></i>
-                </button>
+            <!-- <li class="sidebar-item">
+                <a href="#" class="sidebar-link collapsed has-dropdown {% if active_page == 'system_statistics' %}active{% endif %}" data-bs-toggle="collapse"
+                    data-bs-target="#monitoring" aria-expanded="false" aria-controls="monitoring">
+                    <i class="bi bi-graph-up"></i>
+                   <span>Monitoramento</span>
+                </a>
+                <ul id="monitoring" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">Estatísticas básicas</a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">Estatísitcas avançadas</a>
+                    </li>
+                </ul>
+            </li> -->
+            <li class="sidebar-item">
+                <a href="{{ url_for('auth.user_profile') }}" class="sidebar-link {% if active_page == 'user_profile' %}active{% endif %}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Perfil</span>
+                </a>
+            </li>
+            {% if user.role == 'admin' %}
+            <li class="sidebar-item">
+                <a href="{{ url_for('organizations.organizations') }}" class="sidebar-link {% if active_page == 'organizations' %}active{% endif %}">
+                    <i class="bi bi-building"></i>
+                    <span>Organizações</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('user_management.admin_user_management') }}" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Usuários (Admin)</span>
+                </a>
+            </li>
+            {% elif user.role == 'org_owner' %}
+            <li class="sidebar-item">
+                <a href="{{ url_for('user_management.org_user_management') }}" class="sidebar-link {% if active_page == 'user_management' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Usuários (Organização)</span>
+                </a>
+            </li>
+            {% endif %}
+            <!-- <li class="sidebar-item">
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Configurações</span>
+                </a>
+            </li> -->
+        </ul>
+        <div class="sidebar-footer">
+            <button class="toggle-btn" type="button" id="sidebarToggle">
+                <i class="bi bi-arrow-left-square-fill"></i>
+            </button>
+        </div>
+        <div class="mt-auto p-3" style="border-top: 1px solid #e0e0e0;">
+            <div class="d-flex flex-column gap-2">
+                <a href="http://localhost:8050/docs" target="http://localhost:8050/docs" class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-center sidebar-doc-btn" style="background: #f8f9fa;">
+                    <i class="bi bi-journal-code me-1"></i>
+                    <span class="sidebar-doc-label">Swagger</span>
+                </a>
+                <a href="http://localhost:8050/redoc" target="http://localhost:8050/redoc"  class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-center sidebar-doc-btn" style="background: #f8f9fa;">
+                    <i class="bi bi-journal-text me-1"></i>
+                    <span class="sidebar-doc-label">ReDoc</span>
+                </a>
             </div>
-        </aside>
-
-        <!-- Conteúdo da página -->
-        <div class="main">
-
-            <!-- Navbar superior -->
-            <nav class="navbar navbar-expand border-bottom">
+        </div>
+        <style>
+            #sidebar:not(.expand) .sidebar-doc-label {
+                display: none !important;
+            }
+            #sidebar.expand .sidebar-doc-label {
+                display: inline !important;
+            }
+            /* Optional: center icon when collapsed */
+            #sidebar:not(.expand) .sidebar-doc-btn {
+                justify-content: center !important;
+            }
+        </style>
+    </aside>
+    
+    <!-- Conteúdo da página -->
+    <div class="main">
+        
+        <!-- Navbar superior -->
+        <nav class="navbar navbar-expand border-bottom">
                 <div class="container-fluid">
                     <ul class="navbar-nav ms-auto">
                         <div style="margin-right: 10px;" class="d-flex align-items-center flex-grow-1 justify-content-center">

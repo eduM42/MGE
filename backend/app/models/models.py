@@ -61,7 +61,6 @@ class Device(Base):
     organization = relationship('Organization', back_populates='devices')
     sensors = relationship('Sensor', back_populates='device')
     residential_readings = relationship('ResidentialReading', back_populates='device')
-    sensor_packets = relationship('SensorPacket', back_populates='device')
     alarms = relationship('Alarm', back_populates='device')
     triggered_alarms = relationship('TriggeredAlarm', back_populates='device')
     device_access = relationship('UserDeviceAccess', back_populates='device')
@@ -73,6 +72,7 @@ class Sensor(Base):
     type = Column(String(50), nullable=False)
     phase = Column(Integer)
     device = relationship('Device', back_populates='sensors')
+    sensor_packets = relationship('SensorPacket', back_populates='sensor')
 
 class ResidentialReading(Base):
     __tablename__ = 'residential_readings'
@@ -88,10 +88,10 @@ class ResidentialReading(Base):
 class SensorPacket(Base):
     __tablename__ = 'sensor_packets'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    device_id = Column(UUID(as_uuid=True), ForeignKey('devices.id', ondelete='CASCADE'))
+    sensor_id = Column(UUID(as_uuid=True), ForeignKey('sensors.id', ondelete='CASCADE'))
     received_at = Column(DateTime, default=datetime.utcnow)
     readings = Column(JSON, nullable=False)
-    device = relationship('Device', back_populates='sensor_packets')
+    sensor = relationship('Sensor', back_populates='sensor_packets')
 
 class Alarm(Base):
     __tablename__ = 'alarms'

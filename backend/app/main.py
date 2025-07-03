@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import auth, users, organizations, circuits, devices, sensors, residential_readings, sensor_packets, alarms, triggered_alarms, user_device_access
+from .routers import auth, users, organizations, circuits, devices, sensors, residential_readings, sensor_packets, alarms, triggered_alarms, user_device_access, measurements
 
 app = FastAPI(
     title="FastAPI Backend",
@@ -20,6 +20,7 @@ app.include_router(sensor_packets.router)
 app.include_router(alarms.router)
 app.include_router(triggered_alarms.router)
 app.include_router(user_device_access.router)
+app.include_router(measurements.router)
 
 @app.get("/")
 def read_root():

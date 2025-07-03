@@ -46,7 +46,11 @@ def list_users_by_organization(org_id: str, db: Session = Depends(get_db), curre
         raise HTTPException(status_code=403, detail="Not authorized")
     if current_user.role == 'org_owner' and str(current_user.organization_id) != org_id:
         raise HTTPException(status_code=403, detail="Not authorized for this organization")
-    return db.query(models.User).filter(models.User.organization_id == org_id).all()
+    try:
+        org_uuid = UUID(org_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid organization_id format")
+    return db.query(models.User).filter(models.User.organization_id == org_uuid).all()
 
 @router.patch("/{user_id}", response_model=schemas.UserRead)
 def update_user(user_id: str, user: dict = Body(...), db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

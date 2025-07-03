@@ -46,7 +46,7 @@ def logout():
 
 @auth_bp.route('/user_profile', methods=['GET', 'POST'])
 def user_profile():
-    from app.utils.api import api_get
+    from app.utils.api import api_get, api_patch, api_post
     from app.helpers.navbarHelper import get_navbar_state
     if 'access_token' not in session:
         return redirect(url_for('auth.login'))
@@ -56,6 +56,35 @@ def user_profile():
         session.pop('access_token', None)
         return redirect(url_for('auth.login'))
     user = user_resp.json()
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'update_profile':
+            data = {
+                'name': request.form.get('full_name'),
+                'phone': request.form.get('phone'),
+                'address': request.form.get('address'),
+                'is_residential': request.form.get('is_residential') == 'on',
+            }
+            resp = api_patch('/auth/me', json=data)
+            if resp.status_code == 200:
+                flash('Perfil atualizado com sucesso!', 'success')
+                user = resp.json()
+            else:
+                flash('Erro ao atualizar perfil.', 'danger')
+        elif action == 'change_password':
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            repeat_new_password = request.form.get('repeat_new_password')
+            if new_password != repeat_new_password:
+                flash('As novas senhas não coincidem.', 'danger')
+            else:
+                resp = api_post('/auth/me/change_password', json={
+                    'current_password': current_password,
+                    'new_password': new_password
+                })
+                if resp.status_code == 200:
+                    flash('Senha alterada com sucesso!', 'success')
+                else:
+                    flash('Erro ao alterar senha: ' + resp.text, 'danger')
     navbar_state = get_navbar_state()
-    # TODO: handle POST for profile update and password change
     return render_template('user_profile.html', user=user, navbar_state=navbar_state, active_page='user_profile')

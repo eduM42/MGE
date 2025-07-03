@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -70,3 +70,28 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 @router.get("/me", response_model=UserRead)
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return current_user
+
+@router.patch("/me", response_model=UserRead)
+def update_me(user_update: dict = Body(...), db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    allowed_fields = ["name", "phone", "address", "is_residential"]
+    for field in allowed_fields:
+        if field in user_update:
+            setattr(current_user, field, user_update[field])
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@router.post("/me/change_password")
+def change_password(data: dict = Body(...), db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    from .auth import get_password_hash
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+    if not current_password or not new_password:
+        raise HTTPException(status_code=400, detail="Current and new password required")
+    # Verify current password
+    from .auth import verify_password
+    if not verify_password(current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    current_user.hashed_password = get_password_hash(new_password)
+    db.commit()
+    return {"msg": "Password updated successfully"}

@@ -70,7 +70,7 @@ def org_user_management():
     orgs_resp = api_get('/organizations')
     organizations = orgs_resp.json() if orgs_resp.status_code == 200 else []
     navbar_state = get_navbar_state()
-    return render_template('user_management.html', user=user, users=users, organizations=organizations, navbar_state=navbar_state, active_page='user_management')
+    return render_template('org_user_management.html', user=user, users=users, organizations=organizations, navbar_state=navbar_state, active_page='user_management')
 
 @user_management_bp.route('/user_management/create', methods=['POST'])
 def create_user():

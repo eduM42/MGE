@@ -10,9 +10,12 @@ router = APIRouter(prefix="/sensor_packets", tags=["sensor_packets"])
 
 @router.post("/", response_model=schemas.SensorPacketRead, status_code=status.HTTP_201_CREATED)
 def create_packet(packet: schemas.SensorPacketCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    # Only allow if user owns or has access to the device
-    device = db.query(models.Device).filter(models.Device.id == packet.device_id).first()
-    has_access = device and ((device.user_id == current_user.id) or db.query(models.UserDeviceAccess).filter_by(user_id=current_user.id, device_id=packet.device_id).first())
+    # Only allow if user owns or has access to the device via the sensor
+    sensor = db.query(models.Sensor).filter(models.Sensor.id == packet.sensor_id).first()
+    if not sensor:
+        raise HTTPException(status_code=404, detail="Sensor not found")
+    device = db.query(models.Device).filter(models.Device.id == sensor.device_id).first()
+    has_access = device and ((device.user_id == current_user.id) or db.query(models.UserDeviceAccess).filter_by(user_id=current_user.id, device_id=sensor.device_id).first())
     if not has_access:
         raise HTTPException(status_code=403, detail="Not allowed to add packet for this device")
     db_packet = models.SensorPacket(**packet.dict())
@@ -26,15 +29,19 @@ def list_packets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db),
     # Only return packets for devices the user owns or has access to
     owned_devices = db.query(models.Device.id).filter(models.Device.user_id == current_user.id)
     permitted_devices = db.query(models.UserDeviceAccess.device_id).filter(models.UserDeviceAccess.user_id == current_user.id)
-    return db.query(models.SensorPacket).filter(models.SensorPacket.device_id.in_(owned_devices.union(permitted_devices))).offset(skip).limit(limit).all()
+    sensors = db.query(models.Sensor.id).filter(models.Sensor.device_id.in_(owned_devices.union(permitted_devices)))
+    return db.query(models.SensorPacket).filter(models.SensorPacket.sensor_id.in_(sensors)).offset(skip).limit(limit).all()
 
 @router.get("/{packet_id}", response_model=schemas.SensorPacketRead)
 def get_packet(packet_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     packet = db.query(models.SensorPacket).filter(models.SensorPacket.id == packet_id).first()
     if not packet:
         raise HTTPException(status_code=404, detail="Packet not found")
-    device = db.query(models.Device).filter(models.Device.id == packet.device_id).first()
-    has_access = device and ((device.user_id == current_user.id) or db.query(models.UserDeviceAccess).filter_by(user_id=current_user.id, device_id=packet.device_id).first())
+    sensor = db.query(models.Sensor).filter(models.Sensor.id == packet.sensor_id).first()
+    if not sensor:
+        raise HTTPException(status_code=404, detail="Sensor not found")
+    device = db.query(models.Device).filter(models.Device.id == sensor.device_id).first()
+    has_access = device and ((device.user_id == current_user.id) or db.query(models.UserDeviceAccess).filter_by(user_id=current_user.id, device_id=sensor.device_id).first())
     if not has_access:
         raise HTTPException(status_code=403, detail="Not allowed to view this packet")
     return packet
@@ -44,7 +51,10 @@ def delete_packet(packet_id: int, db: Session = Depends(get_db), current_user: m
     packet = db.query(models.SensorPacket).filter(models.SensorPacket.id == packet_id).first()
     if not packet:
         raise HTTPException(status_code=404, detail="Packet not found")
-    device = db.query(models.Device).filter(models.Device.id == packet.device_id).first()
+    sensor = db.query(models.Sensor).filter(models.Sensor.id == packet.sensor_id).first()
+    if not sensor:
+        raise HTTPException(status_code=404, detail="Sensor not found")
+    device = db.query(models.Device).filter(models.Device.id == sensor.device_id).first()
     if not device or device.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not allowed to delete this packet")
     db.delete(packet)
@@ -57,4 +67,5 @@ def list_packets_by_device(device_id: UUID, db: Session = Depends(get_db), curre
     has_access = device and ((device.user_id == current_user.id) or db.query(models.UserDeviceAccess).filter_by(user_id=current_user.id, device_id=device_id).first())
     if not has_access:
         raise HTTPException(status_code=403, detail="Not allowed to view packets for this device")
-    return db.query(models.SensorPacket).filter(models.SensorPacket.device_id == device_id).all()
+    sensors = db.query(models.Sensor.id).filter(models.Sensor.device_id == device_id)
+    return db.query(models.SensorPacket).filter(models.SensorPacket.sensor_id.in_(sensors)).all()

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Gerenciamento de Sensores</h2>
+    <div class="card mb-4">
+        <div class="card-header">Adicionar Sensor</div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sensors.manage_sensors') }}">
+                <div class="mb-3">
+                    <label for="device_id" class="form-label">Dispositivo</label>
+                    <select class="form-select" id="device_id" name="device_id" required>
+                        {% for device in devices %}
+                        <option value="{{ device.id }}">{{ device.pretty_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="type" class="form-label">Tipo de Sensor</label>
+                    <select class="form-select" id="type" name="type" required>
+                        <option value="current">Corrente</option>
+                        <option value="voltage">Tensão</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="phase" class="form-label">Fase</label>
+                    <input type="number" class="form-control" id="phase" name="phase" min="1" max="3" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Adicionar Sensor</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Seus Sensores</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Dispositivo</th>
+                        <th>Tipo</th>
+                        <th>Fase</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sensor in sensors %}
+                    <tr>
+                        <td>{{ sensor.id }}</td>
+                        <td>{{ sensor.device.pretty_name }}</td>
+                        <td>{% if sensor.type == 'current' %}Corrente{% elif sensor.type == 'voltage' %}Tensão{% else %}{{ sensor.type }}{% endif %}</td>
+                        <td>{{ sensor.phase }}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSensorModal" data-sensor-id="{{ sensor.id }}">
+                                Excluir
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="deleteSensorModal" tabindex="-1" aria-labelledby="deleteSensorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{{ url_for('sensors.manage_sensors') }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteSensorModalLabel">Confirmar Exclusão</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja excluir este sensor?
+          <input type="hidden" name="delete_sensor_id" id="delete_sensor_id_modal" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Excluir</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+var deleteSensorModal = document.getElementById('deleteSensorModal');
+deleteSensorModal.addEventListener('show.bs.modal', function (event) {
+  var button = event.relatedTarget;
+  var sensorId = button.getAttribute('data-sensor-id');
+  var input = document.getElementById('delete_sensor_id_modal');
+  input.value = sensorId;
+});
+</script>
+{% endblock %}

@@ -12,10 +12,10 @@ def get_headers():
         return {'Authorization': f'Bearer {token}'}
     return {}
 
-def api_post(path, data=None, json=None):
+def api_post(path, data=None, json=None, stream=False):
     url = f"{BACKEND_URL}{path}"
     headers = get_headers()
-    return requests.post(url, data=data, json=json, headers=headers)
+    return requests.post(url, data=data, json=json, headers=headers, stream=stream)
 
 def api_get(path, params=None):
     url = f"{BACKEND_URL}{path}"

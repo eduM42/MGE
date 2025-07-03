@@ -6,11 +6,14 @@ from app.utils.measurement_calcs import calculate_rms, calculate_power, calculat
 from datetime import timedelta, datetime
 import io, csv, json
 import pandas as pd
+import uuid
+import asyncio
 
 router = APIRouter(prefix="/measurements", tags=["measurements"])
 
 @router.post("/process_latest")
 def process_latest_measurements(db: Session = Depends(get_db)):
+    from app.event_handlers.alarmHandler import handle_new_measurement
     devices = db.query(models.Device).all()
     for device in devices:
         voltage_sensor = db.query(models.Sensor).filter_by(device_id=device.id, type='voltage').first()
@@ -43,6 +46,16 @@ def process_latest_measurements(db: Session = Depends(get_db)):
         )
         db.add(reading)
         db.commit()
+        # Alarm check (same as in residential_readings)
+        asyncio.create_task(handle_new_measurement(db, device.id, {
+            'device_id': str(device.id),
+            'timestamp': str(v_packet.received_at),
+            'voltage': float(voltage_rms),
+            'current': float(current_rms),
+            'power': float(power),
+            'energy_consumption': float(energy_increment),
+            'power_factor': float(power_factor)
+        }))
     return {"status": "processed"}
 
 @router.post("/export")
@@ -78,7 +91,11 @@ def export_measurements(
     # Query readings
     query = db.query(models.ResidentialReading)
     if devices and 'all' not in devices:
-        query = query.filter(models.ResidentialReading.device_id.in_(devices))
+        try:
+            device_uuids = [uuid.UUID(d) for d in devices]
+        except Exception:
+            return Response(content="Invalid device ID format.", status_code=400)
+        query = query.filter(models.ResidentialReading.device_id.in_(device_uuids))
     query = query.filter(models.ResidentialReading.timestamp >= start, models.ResidentialReading.timestamp <= end)
     readings = query.all()
 

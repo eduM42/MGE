@@ -22,10 +22,10 @@
                 {% if latest_measurement %}
                 <div class="alert alert-light mb-2 p-2">
                     <strong>Medições recentes:</strong><br>
-                    Potência: {{ latest_measurement.power or '-' }}<br>
-                    Tensão: {{ latest_measurement.voltage or '-' }}<br>
-                    Corrente: {{ latest_measurement.current or '-' }}<br>
-                    Consumo: {{ latest_measurement.energy_consumption or '-' }}<br>
+                    Potência: {{ latest_measurement.power or '-' }}W<br>
+                    Tensão: {{ latest_measurement.voltage or '-' }}V<br>
+                    Corrente: {{ latest_measurement.current or '-' }}A<br>
+                    Consumo: {{ latest_measurement.energy_consumption or '-' }}kWh<br>
                     Fator de Potência: {{ latest_measurement.power_factor or '-' }}
                 </div>
                 {% else %}

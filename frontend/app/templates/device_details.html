@@ -15,12 +15,10 @@
     <div class="col-md-4 mb-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Identificador: {{ device.id }}</h5>
+                <h5 class="card-title">{{ device.pretty_name }}</h5>
                 <hr>
                 <p>Circuito: {{ circuit_map[device.circuit_id] if device.circuit_id and device.circuit_id in circuit_map else '-' }}</p>
-                <p>Instalação: {{ device.installation }}</p>
-                <p>Última mensagem: {{ device.last_message }}</p>
-                <p>Estado: <span class="badge {% if device.status == 'ONLINE' %}bg-success{% else %}bg-danger{% endif %}">{{ device.status }}</span></p>
+                <p>Última mensagem: {% if latest_measurement and latest_measurement.timestamp %}{{ latest_measurement.timestamp[:10].replace('-', '/') }} {{ latest_measurement.timestamp[11:19] }}{% else %}-{% endif %}</p>
                 {% if latest_measurement %}
                 <div class="alert alert-light mb-2 p-2">
                     <strong>Medições recentes:</strong><br>
@@ -58,7 +56,7 @@
     <div class="col-md-6 mb-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Consumo <small>Semana</small></h5>
+                <h5 class="card-title">Fator de Potência <small>Tempo</small></h5>
                 <div id="energyChart" class="chart-container"></div>
             </div>
         </div>
@@ -69,47 +67,38 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-    // Dummy data for charts
-    const consumptionData = [
-        { x: '00:00', y: 30 }, { x: '04:00', y: 25 }, { x: '08:00', y: 45 },
-        { x: '12:00', y: 55 }, { x: '16:00', y: 60 }, { x: '20:00', y: 40 }
-    ];
-
-    const voltageData = [
-        { x: '00:00', y: 220 }, { x: '04:00', y: 218 }, { x: '08:00', y: 225 },
-        { x: '12:00', y: 223 }, { x: '16:00', y: 221 }, { x: '20:00', y: 219 }
-    ];
-
-    const energyData = [
-        { x: 'Mon', y: 100 }, { x: 'Tue', y: 110 }, { x: 'Wed', y: 105 },
-        { x: 'Thu', y: 115 }, { x: 'Fri', y: 108 }, { x: 'Sat', y: 95 }, { x: 'Sun', y: 90 }
-    ];
+    // Prepare data from backend
+    var readings = {{ readings|tojson|safe }};
+    // Prepare arrays for charts
+    var consumptionData = readings.map(function(r) { return { x: r.timestamp.slice(0, 19).replace('T', ' '), y: r.energy_consumption }; });
+    var voltageData = readings.map(function(r) { return { x: r.timestamp.slice(0, 19).replace('T', ' '), y: r.voltage }; });
+    var powerFactorData = readings.map(function(r) { return { x: r.timestamp.slice(0, 19).replace('T', ' '), y: r.power_factor }; });
 
     // Consumption Chart
     new ApexCharts(document.querySelector("#consumptionChart"), {
-        series: [{ name: 'Consumption', data: consumptionData }],
+        series: [{ name: 'Consumo', data: consumptionData }],
         chart: { type: 'area', height: 300 },
-        xaxis: { type: 'category' },
+        xaxis: { type: 'category', title: { text: 'Data/Hora' } },
         yaxis: { title: { text: 'kWh' } },
-        title: { text: 'Consumo diário', align: 'left' }
+        title: { text: 'Consumo ao longo do tempo', align: 'left' }
     }).render();
 
     // Voltage Chart
     new ApexCharts(document.querySelector("#voltageChart"), {
         series: [{ name: 'Tensão', data: voltageData }],
         chart: { type: 'line', height: 300 },
-        xaxis: { type: 'category' },
+        xaxis: { type: 'category', title: { text: 'Data/Hora' } },
         yaxis: { title: { text: 'Volts' } },
-        title: { text: 'Tensão (24h)', align: 'left' }
+        title: { text: 'Tensão ao longo do tempo', align: 'left' }
     }).render();
 
-    // Energy Chart
+    // Power Factor Chart
     new ApexCharts(document.querySelector("#energyChart"), {
-        series: [{ name: 'Energy', data: energyData }],
-        chart: { type: 'bar', height: 300 },
-        xaxis: { type: 'category' },
-        yaxis: { title: { text: 'kWh' } },
-        title: { text: 'Consumo energético semanal', align: 'left' }
+        series: [{ name: 'Fator de Potência', data: powerFactorData }],
+        chart: { type: 'line', height: 300 },
+        xaxis: { type: 'category', title: { text: 'Data/Hora' } },
+        yaxis: { title: { text: 'Fator de Potência' }, min: 0, max: 1 },
+        title: { text: 'Fator de Potência ao longo do tempo', align: 'left' }
     }).render();
 </script>
 {% endblock %}

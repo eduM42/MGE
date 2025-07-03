@@ -158,20 +158,20 @@ def device_details(device_id):
         flash('Dispositivo não encontrado.', 'danger')
         return redirect(url_for('devices.index'))
     device = device_resp.json()
-    # Get latest measurement for this device
+    # Get all measurements for this device (for charts)
     readings_resp = api_get(f'/residential_readings/by_device/{device_id}')
     latest_measurement = None
+    readings = []
     if readings_resp.status_code == 200:
         readings = readings_resp.json()
         if readings:
-            # Sort by timestamp descending, get the latest
             readings.sort(key=lambda r: r['timestamp'], reverse=True)
             latest_measurement = readings[0]
     circuits_resp = api_get('/circuits')
     circuits = circuits_resp.json() if circuits_resp.status_code == 200 else []
     circuit_map = build_circuit_map(circuits)
     navbar_state = get_navbar_state()
-    return render_template('device_details.html', user=user, device=device, circuits=circuits, circuit_map=circuit_map, navbar_state=navbar_state, active_page='devices', latest_measurement=latest_measurement)
+    return render_template('device_details.html', user=user, device=device, circuits=circuits, circuit_map=circuit_map, navbar_state=navbar_state, active_page='devices', latest_measurement=latest_measurement, readings=readings)
 
 @devices_bp.route('/system_statistics')
 def system_statistics():

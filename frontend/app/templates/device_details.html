@@ -27,7 +27,8 @@
                     Potência: {{ latest_measurement.power or '-' }}<br>
                     Tensão: {{ latest_measurement.voltage or '-' }}<br>
                     Corrente: {{ latest_measurement.current or '-' }}<br>
-                    Consumo: {{ latest_measurement.energy_consumption or '-' }}
+                    Consumo: {{ latest_measurement.energy_consumption or '-' }}<br>
+                    Fator de Potência: {{ latest_measurement.power_factor or '-' }}
                 </div>
                 {% else %}
                 <div class="alert alert-warning mb-2 p-2">Sem medições recentes.</div>

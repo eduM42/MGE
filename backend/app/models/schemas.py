@@ -95,6 +95,7 @@ class ResidentialReadingBase(BaseModel):
     current: Optional[Decimal] = None
     power: Optional[Decimal] = None
     energy_consumption: Optional[Decimal] = None
+    power_factor: Optional[Decimal] = None  # NEW FIELD
 
 class ResidentialReadingCreate(ResidentialReadingBase):
     pass

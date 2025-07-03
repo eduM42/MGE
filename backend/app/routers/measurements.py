@@ -38,7 +38,8 @@ def process_latest_measurements(db: Session = Depends(get_db)):
             voltage=voltage_rms,
             current=current_rms,
             power=power,
-            energy_consumption=energy_increment
+            energy_consumption=energy_increment,
+            power_factor=power_factor  # Store power factor
         )
         db.add(reading)
         db.commit()
@@ -96,6 +97,8 @@ def export_measurements(
             row['current'] = float(r.current) if r.current is not None else None
         if 'consumption' in measurements:
             row['consumption'] = float(r.energy_consumption) if r.energy_consumption is not None else None
+        if 'power_factor' in measurements:
+            row['power_factor'] = float(r.power_factor) if hasattr(r, 'power_factor') and r.power_factor is not None else None
         rows.append(row)
 
     # Export

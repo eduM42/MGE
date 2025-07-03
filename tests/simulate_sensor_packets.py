@@ -69,11 +69,14 @@ def main():
     print(f"Selected current sensor: {current_sensor['id']}")
     # Simulate readings
     n_packets = int(input("How many packets to send? (default 1): ") or "1")
+    # Prompt for phase shift in degrees
+    phase_shift_deg = float(input("Enter phase shift for current (degrees, e.g. 0 for in-phase, 45 for lower power factor, 90 for minimum real power): ") or "0")
+    phase_shift_rad = math.radians(phase_shift_deg)
     for i in range(n_packets):
         # Generate sine wave for voltage: -179V to 179V (peak-to-peak)
         v_values = [179 * math.sin(2 * math.pi * x / 500) for x in range(500)]
-        # Generate sine wave for current: -1A to 1A (peak-to-peak)
-        i_values = [1 * math.sin(2 * math.pi * x / 500) for x in range(500)]
+        # Generate sine wave for current: -1A to 1A (peak-to-peak), with phase shift
+        i_values = [1 * math.sin(2 * math.pi * x / 500 + phase_shift_rad) for x in range(500)]
         now = datetime.utcnow().isoformat()
         v_packet = {
             "sensor_id": voltage_sensor['id'],

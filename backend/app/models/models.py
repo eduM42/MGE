@@ -83,6 +83,7 @@ class ResidentialReading(Base):
     current = Column(Numeric(10,2))
     power = Column(Numeric(10,2))
     energy_consumption = Column(Numeric(10,2))
+    power_factor = Column(Numeric(10,4))  # NEW FIELD
     device = relationship('Device', back_populates='residential_readings')
 
 class SensorPacket(Base):
